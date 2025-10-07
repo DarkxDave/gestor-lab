@@ -1,0 +1,32 @@
+<% layout('partials/layout') %>
+<h2>Muestras</h2>
+<form class="row g-2 mb-3">
+  <div class="col-auto">
+    <input type="text" class="form-control" name="q" placeholder="Buscar sample_id" value="<%= q %>">
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-outline-primary" type="submit">Buscar</button>
+  </div>
+</form>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>sample_id</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% (samples || []).forEach(s => { %>
+      <tr>
+        <td><%= s.id %></td>
+        <td><%= s.sample_id %></td>
+        <td>
+          <a class="btn btn-sm btn-secondary" href="/form-a/load?sample_id=<%= s.sample_id %>">Form A</a>
+          <a class="btn btn-sm btn-secondary" href="/form-b/load?sample_id=<%= s.sample_id %>">Form B</a>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>

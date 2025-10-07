@@ -1,0 +1,24 @@
+{
+  "name": "gestor-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Gestor de muestras con formularios múltiples, MySQL y exportación a Excel",
+  "main": "src/app.js",
+  "scripts": {
+    "dev": "nodemon src/app.js",
+    "start": "node src/app.js",
+    "db:init": "node scripts/dbInit.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "ejs-mate": "^4.0.0",
+    "exceljs": "^4.4.0",
+    "express": "^4.19.2",
+    "morgan": "^1.10.0",
+    "mysql2": "^3.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}

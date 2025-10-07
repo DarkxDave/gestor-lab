@@ -1,0 +1,36 @@
+const formAModel = require('../models/formA');
+
+exports.renderForm = async (req, res) => {
+  res.render('formA', { title: 'Formulario de Trazabilidad (TPA)', data: null, message: null });
+};
+
+exports.save = async (req, res, next) => {
+  try {
+    const { sample_id } = req.body;
+    if (!sample_id) return res.status(400).render('formA', { title: 'Formulario de Trazabilidad (TPA)', data: null, message: 'sample_id es requerido' });
+
+    const payload = { ...req.body };
+    // Mapear checkboxes 'on' a booleanos para consistencia
+    Object.keys(req.body).forEach(k => {
+      if (req.body[k] === 'on') payload[k] = true;
+    });
+
+    await formAModel.save(sample_id, payload);
+    const data = await formAModel.getBySampleId(sample_id);
+    res.render('formA', { title: 'Formulario de Trazabilidad (TPA)', data, message: 'Guardado correctamente' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.loadBySampleId = async (req, res, next) => {
+  try {
+    const { sample_id } = req.query;
+    if (!sample_id) return res.render('formA', { title: 'Formulario de Trazabilidad (TPA)', data: null, message: 'Ingrese sample_id para cargar' });
+    const data = await formAModel.getBySampleId(sample_id);
+    if (!data) return res.render('formA', { title: 'Formulario de Trazabilidad (TPA)', data: null, message: 'No encontrado' });
+    res.render('formA', { title: 'Formulario de Trazabilidad (TPA)', data, message: null });
+  } catch (err) {
+    next(err);
+  }
+};
