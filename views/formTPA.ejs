@@ -1,8 +1,8 @@
 <% layout('partials/layout') %>
 <h2>Formulario de Trazabilidad (TPA)</h2>
-<form method="get" action="/form-a/load" class="row g-2 mb-3">
+<form method="get" action="/form-tpa" class="row g-2 mb-3">
   <div class="col-auto">
-    <input type="text" name="sample_id" class="form-control" placeholder="sample_id" value="<%= (data && data.sample_id) || '' %>" required>
+    <input type="text" name="sample_id" class="form-control" placeholder="sample_id" value="<%= (data && data.sample_id) || (sampleId||'') %>" required>
   </div>
   <div class="col-auto">
     <button class="btn btn-outline-info" type="submit">Cargar</button>
@@ -16,29 +16,16 @@
   
 </form>
 
-<ul class="nav nav-pills mb-3" role="tablist">
-  <li class="nav-item"><a class="nav-link active" href="#" role="tab">TPA</a></li>
-  <li class="nav-item"><a class="nav-link" href="#" role="tab">ram</a></li>
-  <li class="nav-item"><a class="nav-link" href="#" role="tab">RM y L</a></li>
-  <li class="nav-item"><a class="nav-link" href="#" role="tab">CT, CF y E.coli</a></li>
-  <li class="nav-item"><a class="nav-link" href="#" role="tab">sal</a></li>
-  <li class="nav-item"><a class="nav-link" href="#" role="tab">Entero</a></li>
-  <li class="nav-item"><a class="nav-link" href="#" role="tab">saureus</a></li>
-  <li class="nav-item ms-3"><span class="badge text-bg-secondary">Pestañas de ejemplo (UI)</span></li>
-  <li class="nav-item ms-2"><span class="badge text-bg-info">Excel exporta todas</span></li>
-  
-  <li class="nav-item ms-3"><a class="btn btn-sm btn-success" href="#" data-export-tpa>Exportar Excel</a></li>
-  <li class="nav-item ms-2"><a class="btn btn-sm btn-outline-secondary" href="/export/excel">Resumen (multi)</a></li>
-</ul>
+<%- include('partials/formTabs', { active: 'TPA', sampleId: (data && data.sample_id) || sampleId }) %>
 
 <% if (message) { %>
   <div class="alert alert-info"><%= message %></div>
 <% } %>
 
-<form method="post" action="/form-a/save" class="card p-3 mb-4">
+<form method="post" action="/form-tpa/save" class="card p-3 mb-4">
   <div class="mb-3">
     <label class="form-label">sample_id</label>
-    <input type="text" name="sample_id" class="form-control" value="<%= (data && data.sample_id) || '' %>" required>
+    <input type="text" name="sample_id" class="form-control" value="<%= (data && data.sample_id) || (sampleId||'') %>" required>
   </div>
 
   <div class="card p-3 mb-3">

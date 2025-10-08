@@ -1,0 +1,12 @@
+<% const q = sampleId ? `?sample_id=${encodeURIComponent(sampleId)}` : '' %>
+<ul class="nav nav-pills mb-3" role="tablist">
+  <li class="nav-item"><a class="nav-link <%= active==='TPA'?'active':'' %>" href="/form-tpa<%= q %>" role="tab">TPA</a></li>
+  <li class="nav-item"><a class="nav-link <%= active==='ram'?'active':'' %>" href="/form-ram<%= q %>" role="tab">ram</a></li>
+  <li class="nav-item"><a class="nav-link <%= active==='RM y L'?'active':'' %>" href="/form-rmyl<%= q %>" role="tab">RM y L</a></li>
+  <li class="nav-item"><a class="nav-link <%= active==='CT, CF y E.coli'?'active':'' %>" href="/form-ctcfe<%= q %>" role="tab">CT, CF y E.coli</a></li>
+  <li class="nav-item"><a class="nav-link <%= active==='sal'?'active':'' %>" href="/form-sal<%= q %>" role="tab">sal</a></li>
+  <li class="nav-item"><a class="nav-link <%= active==='Entero'?'active':'' %>" href="/form-entero<%= q %>" role="tab">Entero</a></li>
+  <li class="nav-item"><a class="nav-link <%= active==='saureus'?'active':'' %>" href="/form-saureus<%= q %>" role="tab">saureus</a></li>
+  <li class="nav-item ms-3"><a class="btn btn-sm btn-success" href="#" data-export-tpa>Exportar Excel</a></li>
+  <li class="nav-item ms-2"><a class="btn btn-sm btn-outline-secondary" href="/export/excel">Resumen (multi)</a></li>
+</ul>

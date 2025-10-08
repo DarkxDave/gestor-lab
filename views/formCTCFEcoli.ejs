@@ -1,0 +1,12 @@
+<% layout('partials/layout') %>
+<h2>Formulario CT, CF y E.coli</h2>
+<form method="get" action="/form-ctcfe" class="row g-2 mb-3">
+  <div class="col-auto">
+    <input type="text" name="sample_id" class="form-control" placeholder="sample_id" value="<%= sampleId || '' %>" required>
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-outline-info" type="submit">Cargar</button>
+  </div>
+</form>
+<%- include('partials/formTabs', { active: 'CT, CF y E.coli', sampleId }) %>
+<div class="alert alert-secondary">Contenido CT, CF y E.coli (por definir).</div>

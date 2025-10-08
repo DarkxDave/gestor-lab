@@ -1,0 +1,12 @@
+<% layout('partials/layout') %>
+<h2>Formulario sal</h2>
+<form method="get" action="/form-sal" class="row g-2 mb-3">
+  <div class="col-auto">
+    <input type="text" name="sample_id" class="form-control" placeholder="sample_id" value="<%= sampleId || '' %>" required>
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-outline-info" type="submit">Cargar</button>
+  </div>
+</form>
+<%- include('partials/formTabs', { active: 'sal', sampleId }) %>
+<div class="alert alert-secondary">Contenido sal (por definir).</div>

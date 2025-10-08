@@ -262,3 +262,319 @@ exports.exportExcel = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.exportTPAForm = async (req, res, next) => {
+  try {
+    const sample_id = req.query.sample_id;
+    if (!sample_id) return res.status(400).send('Parámetro sample_id requerido. Ej: /export/tpa-form?sample_id=XYZ');
+
+    const rows = await require('../models/formA').listJoinFormB();
+    const rec = rows.find(r => r.sample_id === sample_id);
+    if (!rec) return res.status(404).send('Muestra no encontrada');
+
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('TPA');
+
+  // Config base
+    ws.properties.defaultRowHeight = 18;
+    const borderThin = { style: 'thin', color: { argb: 'FF000000' } };
+
+    // Helper
+    const setBorder = (range) => {
+      const [r1,c1,r2,c2] = range;
+      for (let r=r1; r<=r2; r++) {
+        for (let c=c1; c<=c2; c++) {
+          const cell = ws.getCell(r,c);
+          cell.border = {
+            top: borderThin,
+            left: borderThin,
+            bottom: borderThin,
+            right: borderThin,
+          };
+        }
+      }
+    };
+    const merge = (r1,c1,r2,c2,val,opts={}) => {
+      ws.mergeCells(r1,c1,r2,c2);
+      const cell = ws.getCell(r1,c1);
+      if (val !== undefined) cell.value = val;
+      if (opts.align) cell.alignment = opts.align;
+      if (opts.font) cell.font = opts.font;
+      return cell;
+    };
+    // Preferimos el símbolo "√" como en tu ejemplo
+    const check = (v) => (v===true || v===1 || v==='1') ? '√' : '';
+  // ==============================
+  // Encabezado superior (filas 1 y 2)
+  // ==============================
+  ws.mergeCells('B1:T1');
+  ws.getCell('B1').value = 'TRAZABILIDAD Y ANÁLISIS';
+  ws.getCell('B1').alignment = { horizontal: 'center' };
+  ws.getCell('B1').font = { bold: true, size: 18 };
+
+  ws.mergeCells('B2:T2');
+  ws.getCell('B2').value = 'R-INS-MM-M-1-15 /23-08-23';
+  ws.getCell('B2').alignment = { horizontal: 'center' };
+  ws.getCell('B2').font = { bold: true, size: 12 };
+
+  // Fila 3: ID de la muestra en la columna 3 (C)
+  const sampleIdOnly = req.query.sample_id || (rec && rec.sample_id) || '';
+  // Limpiamos C3 si lo estuviera usando antes
+  ws.getCell('C3').value = '';
+  // ID destacado debajo de la columna I
+  ws.mergeCells('I3:K3');
+  const idCell = ws.getCell('I3');
+  idCell.value = `${sampleIdOnly}`;
+  idCell.alignment = { horizontal: 'center', vertical: 'middle' };
+  idCell.font = { bold: true, size: 14 };
+  idCell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFF2F2F2'} };
+  ws.getRow(3).height = 24;
+  setBorder([3,9,3,11]); // I3..K3
+
+  // Etiqueta ALI a la izquierda del ID (H3)
+  const aliCell = ws.getCell('H3');
+  aliCell.value = 'ALI';
+  aliCell.alignment = { horizontal: 'center', vertical: 'middle' };
+  aliCell.font = { bold: true };
+  setBorder([3,8,3,8]); // H3
+
+
+    // Ancho de columnas para cuadro de Almacenamiento (similar screenshot)
+    // A vacía, B título, C-G tabla de almacenamiento, H observaciones
+  ws.getColumn(2).width = 35; // B
+  ws.getColumn(3).width = 18; // C
+  ws.getColumn(4).width = 18; // D
+  ws.getColumn(5).width = 18; // E
+  ws.getColumn(6).width = 18; // F
+  ws.getColumn(7).width = 8;  // G
+  ws.getColumn(8).width = 40; // H
+
+    // Bloque: Almacenamiento + Observaciones
+    ws.mergeCells('B5:G5');
+    ws.getCell('B5').value = 'Lugar de almacenamiento de muestras:';
+    ws.getCell('B5').alignment = { horizontal: 'center' };
+    ws.getCell('B5').font = { bold: true, size: 12 };
+
+    ws.mergeCells('H5:H9');
+    ws.getCell('H5').value = 'Observaciones:';
+    ws.getCell('H5').alignment = { vertical: 'top' };
+    ws.getCell('H5').font = { bold: true };
+
+    setBorder([5,2,9,8]); // B5..H9
+
+    const items = [
+      ['Frezeer 33-M','storage_freezer_33m'],
+      ['Refrigerador 33-M','storage_refrigerador_33m'],
+      ['Mesón siembra','storage_meson_siembra'],
+      ['Gabinete sala Traspaso','storage_gabinete_traspaso'],
+    ];
+    ['B6','B7','B8','B9'].forEach((addr, i) => {
+      ws.mergeCells(`${addr}:F${6+i}`);
+      ws.getCell(addr).value = items[i][0];
+      ws.getCell(addr).alignment = { horizontal: 'center' };
+      ws.getCell(`G${6+i}`).value = check(rec[items[i][1]]);
+      ws.getCell(`G${6+i}`).alignment = { horizontal: 'center' };
+    });
+
+    ws.getCell('H6').value = rec.observaciones || '';
+    ws.getCell('H6').alignment = { wrapText: true, vertical: 'top' };
+
+    // ==============================
+    // Sección: MANIPULACIÓN DE MUESTRAS (1)
+    // ==============================
+    // Columnas principales B..K; paneles derechos M..P y R..T
+  ws.getColumn(9).width = 14;  // I opcional
+  ws.getColumn(10).width = 16; // J
+  ws.getColumn(11).width = 18; // K
+  ws.getColumn(12).width = 4;  // L separador
+  ws.getColumn(13).width = 18; // M
+  ws.getColumn(14).width = 18; // N
+  ws.getColumn(15).width = 18; // O
+  ws.getColumn(16).width = 8;  // P marca
+  ws.getColumn(17).width = 3;  // Q separador
+  ws.getColumn(18).width = 22; // R
+  ws.getColumn(19).width = 22; // S
+  ws.getColumn(20).width = 8;  // T marca
+
+    // Título
+    ws.mergeCells('B11:K11');
+    ws.getCell('B11').value = 'MANIPULACIÓN DE MUESTRAS (1)';
+    ws.getCell('B11').alignment = { horizontal: 'center' };
+    ws.getCell('B11').font = { bold: true, size: 12 };
+
+    // Encabezados
+    ws.mergeCells('B12:B13'); ws.getCell('B12').value = 'Retiro de Muestra'; ws.getCell('B12').alignment = { horizontal:'center', vertical:'middle' }; ws.getCell('B12').font = { bold:true };
+    ws.mergeCells('C12:C13'); ws.getCell('C12').value = 'Pesado'; ws.getCell('C12').alignment = { horizontal:'center', vertical:'middle' }; ws.getCell('C12').font = { bold:true };
+    ws.mergeCells('D12:F12'); ws.getCell('D12').value = 'Clave material pesado (*)'; ws.getCell('D12').alignment = { horizontal:'center' }; ws.getCell('D12').font = { bold:true };
+    ws.mergeCells('G12:G13'); ws.getCell('G12').value = 'Responsable'; ws.getCell('G12').alignment = { horizontal:'center', vertical:'middle' }; ws.getCell('G12').font = { bold:true };
+    ws.mergeCells('H12:H13'); ws.getCell('H12').value = 'Fecha'; ws.getCell('H12').alignment = { horizontal:'center', vertical:'middle' }; ws.getCell('H12').font = { bold:true };
+    ws.mergeCells('I12:I13'); ws.getCell('I12').value = 'Hora de inicio'; ws.getCell('I12').alignment = { horizontal:'center', vertical:'middle' }; ws.getCell('I12').font = { bold:true };
+    ws.mergeCells('J12:J13'); ws.getCell('J12').value = 'Hora de término/Inicio de almacenamiento'; ws.getCell('J12').alignment = { horizontal:'center', vertical:'middle' }; ws.getCell('J12').font = { bold:true };
+    ws.mergeCells('K12:K13'); ws.getCell('K12').value = 'N° de muestra'; ws.getCell('K12').alignment = { horizontal:'center', vertical:'middle' }; ws.getCell('K12').font = { bold:true };
+
+    ws.getCell('D13').value = 'Cuchara:'; ws.getCell('D13').alignment = { horizontal:'center' };
+    ws.getCell('E13').value = 'Pinzas:';  ws.getCell('E13').alignment = { horizontal:'center' };
+    ws.getCell('F13').value = 'Bisturí:'; ws.getCell('F13').alignment = { horizontal:'center' };
+
+    // Filas de datos (14..16)
+    const filas = [
+      { retiro:'retiro_muestra_1', pesado:'pesado_1', cm1:'clave_material_1', cm2:'clave_material_2', cm3:'clave_material_3', resp:'responsable_1', fecha:'fecha_1', h1:'hora_inicio_1', h2:'hora_termino_1', n:'n_muestra_1' },
+      { retiro:'retiro_muestra_2', pesado:'pesado_2', cm1:'clave_material_4', cm2:'clave_material_5', cm3:'clave_material_6', resp:'responsable_2', fecha:'fecha_2', h1:'hora_inicio_2', h2:'hora_termino_2', n:'n_muestra_2' },
+      { retiro:'retiro_muestra_3', pesado:'pesado_3', cm1:'clave_material_7', cm2:'clave_material_8', cm3:'clave_material_9', resp:'responsable_3', fecha:'fecha_3', h1:'hora_inicio_3', h2:'hora_termino_3', n:'n_muestra_3' },
+    ];
+    [14,15,16].forEach((r, i) => {
+      const f = filas[i];
+      ws.getCell(`B${r}`).value = check(rec[f.retiro]);
+      ws.getCell(`C${r}`).value = check(rec[f.pesado]);
+      ws.getCell(`D${r}`).value = rec[f.cm1] || '';
+      ws.getCell(`E${r}`).value = rec[f.cm2] || '';
+      ws.getCell(`F${r}`).value = rec[f.cm3] || '';
+      ws.getCell(`G${r}`).value = rec[f.resp] || '';
+      ws.getCell(`H${r}`).value = (rec[f.fecha] instanceof Date) ? rec[f.fecha].toISOString().slice(0,10) : (rec[f.fecha] || '');
+      ws.getCell(`I${r}`).value = rec[f.h1] || '';
+      ws.getCell(`J${r}`).value = rec[f.h2] || '';
+      ws.getCell(`K${r}`).value = rec[f.n] || '';
+    });
+
+    // Bordes del bloque principal B11..K16
+    setBorder([11,2,16,11]);
+
+    // Panel derecho: Equipos para Pesado (M..P) filas 12..18
+    ws.mergeCells('M12:P12'); ws.getCell('M12').value = 'Equipos para Pesado:'; ws.getCell('M12').alignment = { horizontal:'center' }; ws.getCell('M12').font = { bold:true };
+    const eqRows = [
+      ['Balanza  74-M','equipo_balanza_74m'],
+      ['Cámara flujo laminar 8-M','equipo_camara_8m'],
+      ['Balanza  6-M','equipo_balanza_6m'],
+      ['Mesón de  traspaso','equipo_meson_traspaso'],
+      ['Balanza  99-M','equipo_balanza_99m'],
+      ['Balanza  108-M','equipo_balanza_108m', true],
+    ];
+    eqRows.forEach((row,i) => {
+      const rr = 13 + i;
+      ws.mergeCells(`M${rr}:O${rr}`);
+      ws.getCell(`M${rr}`).value = row[0];
+      if (row[2]) ws.getCell(`M${rr}`).font = { bold:true };
+      ws.getCell(`M${rr}`).alignment = { horizontal:'center' };
+      ws.getCell(`P${rr}`).value = check(rec[row[1]]);
+      ws.getCell(`P${rr}`).alignment = { horizontal:'center' };
+    });
+    setBorder([12,13,18,16]); // M12..P18
+
+    // Panel derecho: Lugar de almacenamiento (R..T) filas 12..16
+    ws.mergeCells('R12:T12'); ws.getCell('R12').value = 'Lugar de almacenamiento:'; ws.getCell('R12').alignment = { horizontal:'center' }; ws.getCell('R12').font = { bold:true };
+    const locRows = [
+      ['Frezeer 33-M','storage_freezer_33m'],
+      ['Refrigerador 33-M','storage_refrigerador_33m'],
+      ['Gabinete de Traspaso','storage_gabinete_traspaso'],
+    ];
+    locRows.forEach((row,i) => {
+      const rr = 13 + i;
+      ws.mergeCells(`R${rr}:S${rr}`);
+      ws.getCell(`R${rr}`).value = row[0];
+      ws.getCell(`R${rr}`).alignment = { horizontal:'center' };
+      ws.getCell(`T${rr}`).value = check(rec[row[1]]);
+      ws.getCell(`T${rr}`).alignment = { horizontal:'center' };
+    });
+    setBorder([12,18,16,20]); // R12..T16
+
+  // ==============================
+  // Sección: Puntas/pipetas desechables para pesado (*)
+  // ==============================
+  // Ubicamos este bloque como panel derecho bajo "Lugar de almacenamiento",
+  // usando columnas R..T, para que coincida con el panel angosto de la imagen.
+  const baseP = 18; // inicia dos filas debajo del panel derecho
+
+  // Encabezado (dos filas) centrado y con fondo gris
+  ws.mergeCells(`R${baseP}:T${baseP}`);
+  ws.getCell(`R${baseP}`).value = 'Puntas/pipetas desechables para pesado';
+  ws.getCell(`R${baseP}`).alignment = { horizontal:'center', vertical:'middle' };
+  ws.getCell(`R${baseP}`).font = { bold:true };
+  ws.getCell(`R${baseP}`).fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFD9D9D9'} };
+
+  ws.mergeCells(`R${baseP+1}:T${baseP+1}`);
+  ws.getCell(`R${baseP+1}`).value = '(*)';
+  ws.getCell(`R${baseP+1}`).alignment = { horizontal:'center', vertical:'middle' };
+  ws.getCell(`R${baseP+1}`).font = { bold:true };
+  ws.getCell(`R${baseP+1}`).fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFD9D9D9'} };
+
+  // Filas de datos: etiqueta en R, valores en S..T
+  ws.getCell(`R${baseP+2}`).value = '1ml /clave:';
+  ws.mergeCells(`S${baseP+2}:T${baseP+2}`);
+  ws.getCell(`S${baseP+2}`).value = rec.clave_1ml || '';
+
+  ws.getCell(`R${baseP+3}`).value = '10 ml/clave:';
+  ws.mergeCells(`S${baseP+3}:T${baseP+3}`);
+  ws.getCell(`S${baseP+3}`).value = rec.clave_10ml || '';
+
+  // Área "Otros" con varias filas a la derecha
+  ws.mergeCells(`R${baseP+4}:R${baseP+6}`);
+  ws.getCell(`R${baseP+4}`).value = 'Otros:';
+  ws.getCell(`R${baseP+4}`).alignment = { vertical:'middle' };
+  ws.mergeCells(`S${baseP+4}:T${baseP+6}`);
+  ws.getCell(`S${baseP+4}`).value = rec.clave_otros || '';
+  ws.getCell(`S${baseP+4}`).alignment = { vertical:'top', wrapText:true };
+
+  // Bordes alrededor del bloque completo R18..T24
+  setBorder([baseP,18,baseP+6,20]);
+
+    // ==============================
+    // Pestañas adicionales: ram, RM y L, CT, CF y E.coli, sal, Entero, saureus
+    // ==============================
+    const extraTabs = ['ram', 'RM y L', 'CT, CF y E.coli', 'sal', 'Entero', 'saureus'];
+    const headerMap = {
+      'ram': {
+        title: 'TRAZABILIDAD ANÁLISIS: ENUMERACIÓN DE AEROBIOS MESÓFILOS (NCh 2659.Of 2002)',
+        code: 'R-PR-SVVM-M-4-11 / 15-02-23',
+      },
+      'default': {
+        title: 'TRAZABILIDAD Y ANÁLISIS',
+        code: 'R-INS-MM-M-1-15 /23-08-23',
+      }
+    };
+    const renderHeaderOnly = (sheet, name) => {
+      const conf = headerMap[name] || headerMap.default;
+      // Título
+      sheet.mergeCells('B1:T1');
+      sheet.getCell('B1').value = conf.title;
+      sheet.getCell('B1').alignment = { horizontal: 'center' };
+      sheet.getCell('B1').font = { bold: true, size: 18 };
+      // Código
+      sheet.mergeCells('B2:T2');
+      sheet.getCell('B2').value = conf.code;
+      sheet.getCell('B2').alignment = { horizontal: 'center' };
+      sheet.getCell('B2').font = { bold: true, size: 12 };
+      // Banda ID
+      sheet.mergeCells('I3:K3');
+      const idCell2 = sheet.getCell('I3');
+      idCell2.value = `${sample_id}`;
+      idCell2.alignment = { horizontal: 'center', vertical: 'middle' };
+      idCell2.font = { bold: true, size: 14 };
+      idCell2.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFF2F2F2'} };
+      sheet.getRow(3).height = 24;
+      // Borde ID
+      for (let c=9; c<=11; c++) {
+        const cell = sheet.getCell(3,c);
+        cell.border = { top:{style:'thin'},left:{style:'thin'},bottom:{style:'thin'},right:{style:'thin'} };
+      }
+      // Etiqueta ALI en H3
+      const ali2 = sheet.getCell('H3');
+      ali2.value = 'ALI';
+      ali2.alignment = { horizontal:'center', vertical:'middle' };
+      ali2.font = { bold:true };
+      ali2.border = { top:{style:'thin'},left:{style:'thin'},bottom:{style:'thin'},right:{style:'thin'} };
+    };
+    extraTabs.forEach(name => {
+      const s = wb.addWorksheet(name);
+      renderHeaderOnly(s, name);
+      s.getCell('B5').value = 'Sección en desarrollo';
+      s.getCell('B5').font = { italic: true, color: { argb: 'FF808080' } };
+    });
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="TPA_${sample_id}.xlsx"`);
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (err) {
+    next(err);
+  }
+};

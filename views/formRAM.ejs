@@ -1,0 +1,52 @@
+<% layout('partials/layout') %>
+<h2>RAM: Enumeración de Aerobios Mesófilos</h2>
+<form method="get" action="/form-ram" class="row g-2 mb-3">
+  <div class="col-auto">
+    <input type="text" name="sample_id" class="form-control" placeholder="sample_id" value="<%= sampleId || '' %>" required>
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-outline-info" type="submit">Cargar</button>
+  </div>
+  <div class="col-auto">
+    <a class="btn btn-outline-secondary" href="/samples">Muestras</a>
+  </div>
+  <div class="col-auto">
+    <a class="btn btn-outline-success" href="#" data-export-tpa>Exportar Excel</a>
+  </div>
+</form>
+
+<%- include('partials/formTabs', { active: 'ram', sampleId }) %>
+
+<!-- Encabezado visual como en TPA: title y code -->
+<div class="card p-3 mb-3">
+  <div class="row g-2 align-items-center">
+    <div class="col-12">
+      <div class="text-center fw-bold" style="font-size: 1.25rem;">TRAZABILIDAD ANÁLISIS: ENUMERACIÓN DE AEROBIOS MESÓFILOS (NCh 2659.Of 2002)</div>
+    </div>
+    <div class="col-12">
+      <div class="text-center fw-bold">R-PR-SVVM-M-4-11 / 15-02-23</div>
+    </div>
+  </div>
+</div>
+
+<!-- Banda de ID similar a TPA -->
+<div class="card p-3 mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col-auto"><div class="border fw-bold px-3 py-2">ALI</div></div>
+    <div class="col-auto"><div class="border fw-bold px-4 py-2 bg-light"><%= sampleId || '' %></div></div>
+  </div>
+</div>
+
+<!-- Cuerpo RAM (placeholder, mismo estilo de secciones que TPA) -->
+<div class="card p-3 mb-3">
+  <h5>Materiales y Condiciones</h5>
+  <div class="alert alert-secondary mb-0">Sección RAM en desarrollo (se aplicará el mismo estilo de tablas, check y campos que TPA).</div>
+  <!-- Aquí replicaremos tablas y paneles al definir los campos RAM -->
+  <!-- ... -->
+  <div class="d-flex justify-content-end mt-4">
+    <div style="width:320px;">
+      <hr>
+      <div class="text-center fw-bold">FIRMA COORDINADOR DE ÁREA</div>
+    </div>
+  </div>
+</div>
