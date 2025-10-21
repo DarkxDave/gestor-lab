@@ -13,7 +13,8 @@
 			sampleId = sampleId.trim();
 		}
 		if (!sampleId) return;
-		window.location.href = `/export/tpa-form?sample_id=${encodeURIComponent(sampleId)}`;
+		// Export consolidated per-sample (TPA, RAM, y futuros)
+		window.location.href = `/export/excel-all?sample_id=${encodeURIComponent(sampleId)}`;
 	}
 	document.addEventListener('click', function(e){
 		const a = e.target.closest('[data-export-tpa]');

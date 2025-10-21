@@ -13,6 +13,9 @@
   <div class="col-auto">
     <a class="btn btn-outline-success" href="#" data-export-tpa>Exportar Excel</a>
   </div>
+  <div class="col-auto">
+    <button class="btn btn-outline-primary" type="button" id="btnSaveAll">Guardar en todas</button>
+  </div>
 </form>
 
 <%- include('partials/formTabs', { active: 'ram', sampleId }) %>
@@ -38,15 +41,407 @@
 </div>
 
 <!-- Cuerpo RAM (placeholder, mismo estilo de secciones que TPA) -->
-<div class="card p-3 mb-3">
-  <h5>Materiales y Condiciones</h5>
-  <div class="alert alert-secondary mb-0">Sección RAM en desarrollo (se aplicará el mismo estilo de tablas, check y campos que TPA).</div>
-  <!-- Aquí replicaremos tablas y paneles al definir los campos RAM -->
-  <!-- ... -->
-  <div class="d-flex justify-content-end mt-4">
-    <div style="width:320px;">
-      <hr>
-      <div class="text-center fw-bold">FIRMA COORDINADOR DE ÁREA</div>
+<div class="card p-3 mb-4">
+  <form method="post" action="/form-ram/save">
+    <input type="hidden" name="sample_id" value="<%= sampleId || '' %>">
+
+    <!-- Inicio/Término -->
+    <div class="mb-4">
+      <div class="bg-light border fw-bold text-center py-2 px-3 rounded-top">Fechas y análisis</div>
+      <div class="border border-top-0 rounded-bottom p-3">
+        <div class="row g-3">
+          <div class="col-lg-6">
+            <div class="border rounded p-3 h-100">
+              <div class="fw-bold mb-2">Inicio Incubación (Día/Mes/Hora/Analista):</div>
+              <div class="row g-2">
+                <div class="col-5 col-md-4">
+                  <label class="form-label small mb-1">Fecha</label>
+                  <input type="date" name="inicio_incubacion_fecha" class="form-control" value="<%= (data && data.inicio_incubacion_fecha) || '' %>">
+                </div>
+                <div class="col-4 col-md-3">
+                  <label class="form-label small mb-1">Hora</label>
+                  <input type="time" name="inicio_incubacion_hora" class="form-control" value="<%= (data && data.inicio_incubacion_hora) || '' %>">
+                </div>
+                <div class="col-12 col-md-5">
+                  <label class="form-label small mb-1">Analista</label>
+                  <input type="text" name="inicio_incubacion_analista" class="form-control" value="<%= (data && data.inicio_incubacion_analista) || '' %>">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="border rounded p-3 h-100">
+              <div class="fw-bold mb-2">Término Análisis (Día/Mes/Hora/Analista):</div>
+              <div class="row g-2">
+                <div class="col-5 col-md-4">
+                  <label class="form-label small mb-1">Fecha</label>
+                  <input type="date" name="termino_analisis_fecha" class="form-control" value="<%= (data && data.termino_analisis_fecha) || '' %>">
+                </div>
+                <div class="col-4 col-md-3">
+                  <label class="form-label small mb-1">Hora</label>
+                  <input type="time" name="termino_analisis_hora" class="form-control" value="<%= (data && data.termino_analisis_hora) || '' %>">
+                </div>
+                <div class="col-12 col-md-5">
+                  <label class="form-label small mb-1">Analista</label>
+                  <input type="text" name="termino_analisis_analista" class="form-control" value="<%= (data && data.termino_analisis_analista) || '' %>">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
+
+    <!-- Control Ambiental (debajo de MIC) -->
+    <div class="mb-4">
+      <div class="bg-light border fw-bold text-center py-2 px-3 rounded-top">Control Ambiental</div>
+      <div class="border border-top-0 rounded-bottom p-3">
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle mb-0">
+            <tbody>
+              <tr>
+                <td class="fw-semibold" style="width: 22%">Control Ambiental Pesado: T°:</td>
+                <td style="width: 18%"><input type="text" name="ca_pesado_temp" class="form-control" value="<%= (data && data.ca_pesado_temp) || '' %>"></td>
+                <td style="width: 10%">UFC:</td>
+                <td style="width: 18%"><input type="text" name="ca_pesado_ufc" class="form-control" value="<%= (data && data.ca_pesado_ufc) || '' %>"></td>
+                <td class="fw-semibold" style="width: 22%">Control ambiental Siembra:</td>
+                <td><input type="text" name="ca_siembra" class="form-control" value="<%= (data && data.ca_siembra) || '' %>"></td>
+              </tr>
+              <tr>
+                <td class="fw-semibold">Control de siembra E. Coli (UFC):</td>
+                <td colspan="2"><input type="text" name="ca_ecoli_ufc" class="form-control" value="<%= (data && data.ca_ecoli_ufc) || '' %>"></td>
+                <td class="fw-semibold">Blanco (UFC):</td>
+                <td colspan="3"><input type="text" name="ca_blanco_ufc" class="form-control" value="<%= (data && data.ca_blanco_ufc) || '' %>"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Siembra -->
+    <div class="mb-4">
+      <div class="bg-light border fw-bold text-center py-2 px-3 rounded-top">Siembra</div>
+      <div class="border border-top-0 rounded-bottom p-3">
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" id="siembra_tiempo_ok" name="siembra_tiempo_ok" <%= (data && data.siembra_tiempo_ok) ? 'checked' : '' %> >
+          <label class="form-check-label" for="siembra_tiempo_ok">Tiempo entre homogenizado y siembra &lt; 15 minutos</label>
+        </div>
+        <div class="row g-2">
+          <div class="col-sm-4 col-md-3">
+            <label class="form-label small mb-1">Minutos</label>
+            <input type="number" min="0" name="siembra_tiempo_minutos" class="form-control" value="<%= (data && data.siembra_tiempo_minutos) || '' %>">
+          </div>
+          <div class="col-sm-8 col-md-5">
+            <label class="form-label small mb-1">N° de Muestra (10gr/90ml)</label>
+            <input type="text" name="siembra_n_muestra_10g_90ml" class="form-control" value="<%= (data && data.siembra_n_muestra_10g_90ml) || '' %>">
+          </div>
+          <div class="col-sm-8 col-md-4">
+            <label class="form-label small mb-1">N° de Muestra (50gr/450ml)</label>
+            <input type="text" name="siembra_n_muestra_50g_450ml" class="form-control" value="<%= (data && data.siembra_n_muestra_50g_450ml) || '' %>">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controles de Calidad -->
+    <div class="mb-4">
+      <div class="bg-light border fw-bold text-center py-2 px-3 rounded-top">Controles de Calidad</div>
+      <div class="border border-top-0 rounded-bottom p-3">
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle mb-0">
+        <thead>
+          <tr class="text-center">
+            <th style="width: 25%">Ítem</th>
+            <th style="width: 30%">Detalle (texto)</th>
+            <th style="width: 15%">Análisis (texto)</th>
+            <th style="width: 15%">Cumple</th>
+            <th style="width: 15%">No Cumple</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="fw-semibold">Duplicado en ALI</td>
+            <td><input type="text" name="cc_duplicado_ali_detalle" class="form-control" value="<%= (data && data.cc_duplicado_ali_detalle) || '' %>"></td>
+            <td><input type="text" name="cc_duplicado_ali_analisis" class="form-control" value="<%= (data && data.cc_duplicado_ali_analisis) || '' %>"></td>
+            <td class="text-center">
+              <input class="form-check-input" type="radio" name="cc_duplicado_ali_cumple" value="1" <%= (data && String(data.cc_duplicado_ali_cumple) === '1') ? 'checked' : '' %> >
+            </td>
+            <td class="text-center">
+              <input class="form-check-input" type="radio" name="cc_duplicado_ali_cumple" value="0" <%= (data && String(data.cc_duplicado_ali_cumple) === '0') ? 'checked' : '' %> >
+            </td>
+          </tr>
+          <tr>
+            <td class="fw-semibold">Control (+) y Blanco en ALI</td>
+            <td><input type="text" name="cc_control_pos_blanco_ali_detalle" class="form-control" value="<%= (data && data.cc_control_pos_blanco_ali_detalle) || '' %>"></td>
+            <td><input type="text" name="cc_control_pos_blanco_ali_analisis" class="form-control" value="<%= (data && data.cc_control_pos_blanco_ali_analisis) || '' %>"></td>
+            <td class="text-center">
+              <input class="form-check-input" type="radio" name="cc_control_pos_blanco_ali_cumple" value="1" <%= (data && String(data.cc_control_pos_blanco_ali_cumple) === '1') ? 'checked' : '' %> >
+            </td>
+            <td class="text-center">
+              <input class="form-check-input" type="radio" name="cc_control_pos_blanco_ali_cumple" value="0" <%= (data && String(data.cc_control_pos_blanco_ali_cumple) === '0') ? 'checked' : '' %> >
+            </td>
+          </tr>
+          <tr>
+            <td class="fw-semibold">Control de Siembra en ALI</td>
+            <td><input type="text" name="cc_control_siembra_ali_detalle" class="form-control" value="<%= (data && data.cc_control_siembra_ali_detalle) || '' %>"></td>
+            <td><input type="text" name="cc_control_siembra_ali_analisis" class="form-control" value="<%= (data && data.cc_control_siembra_ali_analisis) || '' %>"></td>
+            <td class="text-center">
+              <input class="form-check-input" type="radio" name="cc_control_siembra_ali_cumple" value="1" <%= (data && String(data.cc_control_siembra_ali_cumple) === '1') ? 'checked' : '' %> >
+            </td>
+            <td class="text-center">
+              <input class="form-check-input" type="radio" name="cc_control_siembra_ali_cumple" value="0" <%= (data && String(data.cc_control_siembra_ali_cumple) === '0') ? 'checked' : '' %> >
+            </td>
+          </tr>
+          
+        </tbody>
+        </table>
+      </div>
+      </div>
+    </div>
+
+    <!-- MIC Parte II Sección III Cap IV pto 1 y 2 -->
+    <!-- Control de Calidad 2 -->
+    <div class="mb-4">
+      <div class="bg-light border fw-bold text-center py-2 px-3 rounded-top">Control de Calidad 2</div>
+      <div class="border border-top-0 rounded-bottom p-3">
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle mb-0">
+            <tbody>
+              <tr>
+                <td class="fw-semibold" style="width: 24%">Control Ambiental Pesado: T°:</td>
+                <td style="width: 16%"><input type="text" name="cc2_pesado_temp" class="form-control" value="<%= (data && data.cc2_pesado_temp) || '' %>"></td>
+                <td style="width: 8%">UFC:</td>
+                <td style="width: 16%"><input type="text" name="cc2_pesado_ufc" class="form-control" value="<%= (data && data.cc2_pesado_ufc) || '' %>"></td>
+                <td class="fw-semibold" style="width: 20%">Control ambiental Siembra:</td>
+                <td><input type="text" name="cc2_siembra" class="form-control" value="<%= (data && data.cc2_siembra) || '' %>"></td>
+              </tr>
+              <tr>
+                <td class="fw-semibold">Hora inicio:</td>
+                <td><input type="time" name="cc2_hora_inicio" class="form-control" value="<%= (data && data.cc2_hora_inicio) || '' %>"></td>
+                <td class="fw-semibold">Hora término:</td>
+                <td><input type="time" name="cc2_hora_termino" class="form-control" value="<%= (data && data.cc2_hora_termino) || '' %>"></td>
+                <td class="fw-semibold">T°:</td>
+                <td><input type="text" name="cc2_temp" class="form-control" value="<%= (data && data.cc2_temp) || '' %>"></td>
+              </tr>
+              <tr>
+                <td class="fw-semibold">Control de siembra E. Coli (UFC):</td>
+                <td colspan="2"><input type="text" name="cc2_ecoli_ufc" class="form-control" value="<%= (data && data.cc2_ecoli_ufc) || '' %>"></td>
+                <td class="fw-semibold">Blanco (UFC):</td>
+                <td colspan="2"><input type="text" name="cc2_blanco_ufc" class="form-control" value="<%= (data && data.cc2_blanco_ufc) || '' %>"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- MIC Parte II Sección III Cap IV pto 1 y 2 -->
+    <div class="mb-4">
+      <div class="bg-light border fw-bold text-center py-2 px-3 rounded-top">Manual de Inocuidad y Certificación Parte II Sección III Cap IV pto 1 y 2</div>
+      <div class="border border-top-0 rounded-bottom p-3">
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle mb-0">
+            <tbody>
+              <tr>
+                <td class="fw-semibold" style="width: 25%">Desfavorable:</td>
+                <td class="text-center" style="width: 10%">
+                  <div class="form-check d-inline-block">
+                    <input class="form-check-input" type="checkbox" id="mic_desfavorable_si" name="mic_desfavorable_si" <%= (data && data.mic_desfavorable_si) ? 'checked' : '' %> >
+                    <label class="form-check-label ms-1" for="mic_desfavorable_si">SI</label>
+                  </div>
+                </td>
+                <td class="text-center" style="width: 10%">
+                  <div class="form-check d-inline-block">
+                    <input class="form-check-input" type="checkbox" id="mic_desfavorable_no" name="mic_desfavorable_no" <%= (data && data.mic_desfavorable_no) ? 'checked' : '' %> >
+                    <label class="form-check-label ms-1" for="mic_desfavorable_no">NO</label>
+                  </div>
+                </td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="fw-semibold">Tabla/Página:</td>
+                <td colspan="2"><input type="text" name="mic_tabla_pagina" class="form-control" value="<%= (data && data.mic_tabla_pagina) || '' %>"></td>
+                <td class="fw-semibold">Límite:
+                  <input type="text" name="mic_limite" class="form-control mt-1" value="<%= (data && data.mic_limite) || '' %>">
+                </td>
+              </tr>
+              <tr>
+                <td class="fw-semibold">Fecha y hora de entrega:</td>
+                <td style="width: 20%">
+                  <input type="date" name="mic_fecha_entrega" class="form-control" value="<%= (data && data.mic_fecha_entrega) || '' %>">
+                </td>
+                <td style="width: 20%">
+                  <input type="time" name="mic_hora_entrega" class="form-control" value="<%= (data && data.mic_hora_entrega) || '' %>">
+                </td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notas/Observaciones -->
+    <!-- Muestrario -->
+    <div class="mb-4">
+      <div class="bg-light border fw-bold text-center py-2 px-3 rounded-top">Muestrario</div>
+      <div class="border border-top-0 rounded-bottom p-3">
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle mb-0 text-center">
+            <thead>
+              <tr>
+                <th style="width: 22%"></th>
+                <th colspan="2" style="width: 39%">N° de Muestra:</th>
+                <th colspan="2" style="width: 39%">Duplicado:</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Fila de números de muestra (ej. 1056 / 1) -->
+              <tr>
+                <td class="text-start fw-semibold">N°</td>
+                <td>
+                  <input type="text" name="muestrario_muestra_no_1" class="form-control" value="<%= sampleId || '' %>" readonly>
+                </td>
+                <td>
+                  <input type="text" name="muestrario_muestra_rep_1" class="form-control" placeholder="1" value="<%= (data && data.muestrario_muestra_rep_1) || '' %>">
+                </td>
+                <td>
+                  <input type="text" name="muestrario_muestra_no_2" class="form-control" value="<%= sampleId || '' %>" readonly>
+                </td>
+                <td>
+                  <input type="text" name="muestrario_muestra_rep_2" class="form-control" placeholder="1d" value="<%= (data && data.muestrario_muestra_rep_2) || '' %>">
+                </td>
+              </tr>
+              <!-- Dilución -->
+              <tr>
+                <td class="text-start fw-semibold">Dil.:</td>
+                <td colspan="2">
+                  <input type="text" name="muestrario_dil_1" class="form-control" value="<%= (data && data.muestrario_dil_1) || '' %>">
+                </td>
+                <td colspan="2">
+                  <input type="text" name="muestrario_dil_2" class="form-control" value="<%= (data && data.muestrario_dil_2) || '' %>">
+                </td>
+              </tr>
+              <!-- N° de colonias (c) - 1 -->
+              <tr>
+                <td class="text-start fw-semibold">N° de colonias (c):</td>
+                <td colspan="2"><input type="text" name="muestrario_c1_1" class="form-control" value="<%= (data && data.muestrario_c1_1) || '' %>"></td>
+                <td colspan="2"><input type="text" name="muestrario_c1_2" class="form-control" value="<%= (data && data.muestrario_c1_2) || '' %>"></td>
+              </tr>
+              <!-- N° de colonias (c) - 2 -->
+              <tr>
+                <td class="text-start fw-semibold">N° de colonias (c):</td>
+                <td colspan="2"><input type="text" name="muestrario_c2_1" class="form-control" value="<%= (data && data.muestrario_c2_1) || '' %>"></td>
+                <td colspan="2"><input type="text" name="muestrario_c2_2" class="form-control" value="<%= (data && data.muestrario_c2_2) || '' %>"></td>
+              </tr>
+              <!-- ΣC (*) -->
+              <tr>
+                <td class="text-start fw-semibold">∑C (*)</td>
+                <td colspan="2"><input type="text" name="muestrario_sumc_1" class="form-control" value="<%= (data && data.muestrario_sumc_1) || '' %>"></td>
+                <td colspan="2"><input type="text" name="muestrario_sumc_2" class="form-control" value="<%= (data && data.muestrario_sumc_2) || '' %>"></td>
+              </tr>
+              <!-- d (*) -->
+              <tr>
+                <td class="text-start fw-semibold">d (*)</td>
+                <td colspan="2"><input type="text" name="muestrario_d_1" class="form-control" value="<%= (data && data.muestrario_d_1) || '' %>"></td>
+                <td colspan="2"><input type="text" name="muestrario_d_2" class="form-control" value="<%= (data && data.muestrario_d_2) || '' %>"></td>
+              </tr>
+              <!-- n1 (*) -->
+              <tr>
+                <td class="text-start fw-semibold">n1 (*)</td>
+                <td colspan="2"><input type="text" name="muestrario_n1_1" class="form-control" value="<%= (data && data.muestrario_n1_1) || '' %>"></td>
+                <td colspan="2"><input type="text" name="muestrario_n1_2" class="form-control" value="<%= (data && data.muestrario_n1_2) || '' %>"></td>
+              </tr>
+              <!-- n2 (*) -->
+              <tr>
+                <td class="text-start fw-semibold">n2 (*)</td>
+                <td colspan="2"><input type="text" name="muestrario_n2_1" class="form-control" value="<%= (data && data.muestrario_n2_1) || '' %>"></td>
+                <td colspan="2"><input type="text" name="muestrario_n2_2" class="form-control" value="<%= (data && data.muestrario_n2_2) || '' %>"></td>
+              </tr>
+              <!-- x (*) -->
+              <tr>
+                <td class="text-start fw-semibold">x (*)</td>
+                <td colspan="2"><input type="text" name="muestrario_x_1" class="form-control" value="<%= (data && data.muestrario_x_1) || '' %>"></td>
+                <td colspan="2"><input type="text" name="muestrario_x_2" class="form-control" value="<%= (data && data.muestrario_x_2) || '' %>"></td>
+              </tr>
+              <!-- Resultado RAM/Analista Lectura -->
+              <tr>
+                <td class="text-start fw-semibold">Resultado RAM/Analista Lectura:</td>
+                <td><input type="text" name="muestrario_resultado_ram_1" class="form-control" value="<%= (data && data.muestrario_resultado_ram_1) || '' %>"></td>
+                <td class="fw-semibold">UFC/g</td>
+                <td><input type="text" name="muestrario_resultado_ram_2" class="form-control" value="<%= (data && data.muestrario_resultado_ram_2) || '' %>"></td>
+                <td class="fw-semibold">UFC/g</td>
+              </tr>
+              <!-- Resultado RPES/Analista Lectura -->
+              <tr>
+                <td class="text-start fw-semibold">Resultado RPES/Analista Lectura:</td>
+                <td><input type="text" name="muestrario_resultado_rpes_1" class="form-control" value="<%= (data && data.muestrario_resultado_rpes_1) || '' %>"></td>
+                <td class="fw-semibold">UFC/g</td>
+                <td><input type="text" name="muestrario_resultado_rpes_2" class="form-control" value="<%= (data && data.muestrario_resultado_rpes_2) || '' %>"></td>
+                <td class="fw-semibold">UFC/g</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-4">
+      <div class="bg-light border fw-bold text-center py-2 px-3 rounded-top">Notas y Observaciones</div>
+      <div class="border border-top-0 rounded-bottom p-3">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Notas</label>
+            <textarea name="notes" class="form-control" rows="3"><%= (data && data.notes) || '' %></textarea>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Observaciones</label>
+            <textarea name="observaciones" class="form-control" rows="3"><%= (data && data.observaciones) || '' %></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-4">
+      <div style="width:320px;">
+        <hr>
+        <div class="text-center fw-bold">FIRMA COORDINADOR DE ÁREA</div>
+      </div>
+      <div>
+        <button class="btn btn-primary" type="submit">Guardar RAM</button>
+      </div>
+    </div>
+
+    <% if (message) { %>
+      <div class="alert alert-info mt-3"><%= message %></div>
+    <% } %>
+  </form>
 </div>
+
+<script>
+  (function(){
+    const btn = document.getElementById('btnSaveAll');
+    if (!btn) return;
+    btn.addEventListener('click', async function(){
+      const sampleInput = document.querySelector('input[name="sample_id"]');
+      const sampleId = sampleInput ? sampleInput.value.trim() : '';
+      if (!sampleId) { alert('Ingrese sample_id y cargue la muestra primero.'); return; }
+      try {
+        const res = await fetch('/form-ram/save-all', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sample_id: sampleId })
+        });
+        const data = await res.json();
+        if (data && data.ok) {
+          alert('Guardado en todas las pestañas realizado.');
+        } else {
+          alert('No se pudo guardar en todas: ' + (data.error || 'Error desconocido'));
+        }
+      } catch (err) {
+        alert('Error al guardar en todas: ' + err.message);
+      }
+    });
+  })();
+</script>

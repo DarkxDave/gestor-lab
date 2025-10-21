@@ -8,11 +8,14 @@ CREATE TABLE IF NOT EXISTS samples (
   sample_id VARCHAR(100) NOT NULL UNIQUE
 ) ENGINE=InnoDB;
 
--- Formulario A (Trazabilidad - TPA)
+-- Formularios nuevos con sample_id como PRIMARY KEY
 DROP TABLE IF EXISTS form_a_entries;
-CREATE TABLE form_a_entries (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  sample_id VARCHAR(100) NOT NULL,
+DROP TABLE IF EXISTS form_b_entries;
+
+-- TPA
+DROP TABLE IF EXISTS form_tpa_entries;
+CREATE TABLE IF NOT EXISTS form_tpa_entries (
+  sample_id VARCHAR(100) NOT NULL PRIMARY KEY,
   -- Almacenamiento
   storage_freezer_33m BOOLEAN NOT NULL DEFAULT 0,
   storage_refrigerador_33m BOOLEAN NOT NULL DEFAULT 0,
@@ -122,17 +125,141 @@ CREATE TABLE form_a_entries (
 
   created_at DATETIME NOT NULL,
   updated_at DATETIME NOT NULL,
-  CONSTRAINT fk_form_a_sample FOREIGN KEY (sample_id) REFERENCES samples(sample_id) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT fk_form_tpa_sample FOREIGN KEY (sample_id) REFERENCES samples(sample_id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
--- Formulario B
-CREATE TABLE IF NOT EXISTS form_b_entries (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  sample_id VARCHAR(100) NOT NULL,
+-- RAM
+DROP TABLE IF EXISTS form_ram_entries;
+CREATE TABLE IF NOT EXISTS form_ram_entries (
+  sample_id VARCHAR(100) NOT NULL PRIMARY KEY,
+  -- Fechas y análisis
+  inicio_incubacion_fecha DATE NULL,
+  inicio_incubacion_hora TIME NULL,
+  inicio_incubacion_analista VARCHAR(255) NULL,
+  termino_analisis_fecha DATE NULL,
+  termino_analisis_hora TIME NULL,
+  termino_analisis_analista VARCHAR(255) NULL,
+
+  -- Control Ambiental
+  ca_pesado_temp VARCHAR(50) NULL,
+  ca_pesado_ufc VARCHAR(50) NULL,
+  ca_siembra VARCHAR(255) NULL,
+  ca_ecoli_ufc VARCHAR(50) NULL,
+  ca_blanco_ufc VARCHAR(50) NULL,
+
+  -- Siembra
+  siembra_tiempo_ok BOOLEAN NOT NULL DEFAULT 0,
+  siembra_tiempo_minutos INT NULL,
+  siembra_n_muestra_10g_90ml VARCHAR(100) NULL,
+  siembra_n_muestra_50g_450ml VARCHAR(100) NULL,
+
+  -- Controles de Calidad
+  cc_duplicado_ali_detalle VARCHAR(255) NULL,
+  cc_duplicado_ali_analisis VARCHAR(255) NULL,
+  cc_duplicado_ali_cumple TINYINT(1) NULL,
+  cc_control_pos_blanco_ali_detalle VARCHAR(255) NULL,
+  cc_control_pos_blanco_ali_analisis VARCHAR(255) NULL,
+  cc_control_pos_blanco_ali_cumple TINYINT(1) NULL,
+  cc_control_siembra_ali_detalle VARCHAR(255) NULL,
+  cc_control_siembra_ali_analisis VARCHAR(255) NULL,
+  cc_control_siembra_ali_cumple TINYINT(1) NULL,
+
+  -- Control de Calidad 2
+  cc2_pesado_temp VARCHAR(50) NULL,
+  cc2_pesado_ufc VARCHAR(50) NULL,
+  cc2_siembra VARCHAR(255) NULL,
+  cc2_hora_inicio TIME NULL,
+  cc2_hora_termino TIME NULL,
+  cc2_temp VARCHAR(50) NULL,
+  cc2_ecoli_ufc VARCHAR(50) NULL,
+  cc2_blanco_ufc VARCHAR(50) NULL,
+
+  -- MIC Parte II Sección III Cap IV pto 1 y 2
+  mic_desfavorable_si BOOLEAN NOT NULL DEFAULT 0,
+  mic_desfavorable_no BOOLEAN NOT NULL DEFAULT 0,
+  mic_tabla_pagina VARCHAR(100) NULL,
+  mic_limite VARCHAR(100) NULL,
+  mic_fecha_entrega DATE NULL,
+  mic_hora_entrega TIME NULL,
+
+  -- Muestrario
+  muestrario_muestra_rep_1 VARCHAR(50) NULL,
+  muestrario_muestra_rep_2 VARCHAR(50) NULL,
+  muestrario_dil_1 VARCHAR(50) NULL,
+  muestrario_dil_2 VARCHAR(50) NULL,
+  muestrario_c1_1 VARCHAR(50) NULL,
+  muestrario_c1_2 VARCHAR(50) NULL,
+  muestrario_c2_1 VARCHAR(50) NULL,
+  muestrario_c2_2 VARCHAR(50) NULL,
+  muestrario_sumc_1 VARCHAR(50) NULL,
+  muestrario_sumc_2 VARCHAR(50) NULL,
+  muestrario_d_1 VARCHAR(50) NULL,
+  muestrario_d_2 VARCHAR(50) NULL,
+  muestrario_n1_1 VARCHAR(50) NULL,
+  muestrario_n1_2 VARCHAR(50) NULL,
+  muestrario_n2_1 VARCHAR(50) NULL,
+  muestrario_n2_2 VARCHAR(50) NULL,
+  muestrario_x_1 VARCHAR(50) NULL,
+  muestrario_x_2 VARCHAR(50) NULL,
+  muestrario_resultado_ram_1 VARCHAR(100) NULL,
+  muestrario_resultado_ram_2 VARCHAR(100) NULL,
+  muestrario_resultado_rpes_1 VARCHAR(100) NULL,
+  muestrario_resultado_rpes_2 VARCHAR(100) NULL,
+
+  -- Notas
   notes TEXT NULL,
-  approved BOOLEAN NOT NULL DEFAULT 0,
-  qc_pass BOOLEAN NOT NULL DEFAULT 0,
+  observaciones TEXT NULL,
   created_at DATETIME NOT NULL,
   updated_at DATETIME NOT NULL,
-  CONSTRAINT fk_form_b_sample FOREIGN KEY (sample_id) REFERENCES samples(sample_id) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT fk_form_ram_sample FOREIGN KEY (sample_id) REFERENCES samples(sample_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- RM y L
+DROP TABLE IF EXISTS form_rmyl_entries;
+CREATE TABLE IF NOT EXISTS form_rmyl_entries (
+  sample_id VARCHAR(100) NOT NULL PRIMARY KEY,
+  notes TEXT NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
+  CONSTRAINT fk_form_rmyl_sample FOREIGN KEY (sample_id) REFERENCES samples(sample_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- CT, CF y E.coli
+DROP TABLE IF EXISTS form_ctcfe_entries;
+CREATE TABLE IF NOT EXISTS form_ctcfe_entries (
+  sample_id VARCHAR(100) NOT NULL PRIMARY KEY,
+  notes TEXT NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
+  CONSTRAINT fk_form_ctcfe_sample FOREIGN KEY (sample_id) REFERENCES samples(sample_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- sal
+DROP TABLE IF EXISTS form_sal_entries;
+CREATE TABLE IF NOT EXISTS form_sal_entries (
+  sample_id VARCHAR(100) NOT NULL PRIMARY KEY,
+  notes TEXT NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
+  CONSTRAINT fk_form_sal_sample FOREIGN KEY (sample_id) REFERENCES samples(sample_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- Entero
+DROP TABLE IF EXISTS form_entero_entries;
+CREATE TABLE IF NOT EXISTS form_entero_entries (
+  sample_id VARCHAR(100) NOT NULL PRIMARY KEY,
+  notes TEXT NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
+  CONSTRAINT fk_form_entero_sample FOREIGN KEY (sample_id) REFERENCES samples(sample_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- saureus
+DROP TABLE IF EXISTS form_saureus_entries;
+CREATE TABLE IF NOT EXISTS form_saureus_entries (
+  sample_id VARCHAR(100) NOT NULL PRIMARY KEY,
+  notes TEXT NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
+  CONSTRAINT fk_form_saureus_sample FOREIGN KEY (sample_id) REFERENCES samples(sample_id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;

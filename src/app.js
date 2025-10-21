@@ -21,20 +21,26 @@ app.set('view engine', 'ejs');
 
 // Routes
 const indexRoutes = require('./routes/index');
-const formARoutes = require('./routes/formA');
 const formTPARoutes = require('./routes/formTPA');
-const formBRoutes = require('./routes/formB');
+const formRAMRoutes = require('./routes/formRAM');
+const formRMyLRoutes = require('./routes/formRMyL');
+const formCTCFERoutes = require('./routes/formCTCFE');
+const formSalRoutes = require('./routes/formSal');
+const formEnteroRoutes = require('./routes/formEntero');
+const formSaureusRoutes = require('./routes/formSaureus');
 const sampleRoutes = require('./routes/samples');
 const exportRoutes = require('./routes/export');
 
 app.use('/', indexRoutes);
-app.use('/form-a', formARoutes);
-const formExtraRoutes = require('./routes/formExtras');
 app.use('/form-tpa', formTPARoutes);
-app.use('/form-b', formBRoutes);
+app.use('/form-ram', formRAMRoutes);
+app.use('/form-rmyl', formRMyLRoutes);
+app.use('/form-ctcfe', formCTCFERoutes);
+app.use('/form-sal', formSalRoutes);
+app.use('/form-entero', formEnteroRoutes);
+app.use('/form-saureus', formSaureusRoutes);
 app.use('/samples', sampleRoutes);
 app.use('/export', exportRoutes);
-app.use('/', formExtraRoutes);
 
 // 404
 app.use((req, res) => {

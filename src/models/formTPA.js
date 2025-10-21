@@ -26,9 +26,8 @@ const timeFields = ['hora_inicio_1','hora_termino_1','hora_inicio_2','hora_termi
 
 exports.save = async (sample_id, payload) => {
   await samples.ensureSample(sample_id);
-  const rows = await query('SELECT id FROM form_a_entries WHERE sample_id = ?', [sample_id]);
+  const rows = await query('SELECT sample_id FROM form_tpa_entries WHERE sample_id = ?', [sample_id]);
 
-  // Normalize booleans and nullables
   const data = {};
   booleanFields.forEach(k => data[k] = !!payload[k]);
   textFields.forEach(k => data[k] = payload[k] ? String(payload[k]) : null);
@@ -45,28 +44,27 @@ exports.save = async (sample_id, payload) => {
 
   if (rows.length) {
     const setClause = columns.map(c => `${c}=?`).join(', ');
-    await query(`UPDATE form_a_entries SET ${setClause}, updated_at=NOW() WHERE sample_id=?`, [...values, sample_id]);
+    await query(`UPDATE form_tpa_entries SET ${setClause}, updated_at=NOW() WHERE sample_id=?`, [...values, sample_id]);
   } else {
     const colList = columns.join(', ');
     const placeholders = columns.map(() => '?').join(', ');
-    await query(`INSERT INTO form_a_entries (sample_id, ${colList}, created_at, updated_at) VALUES (?, ${placeholders}, NOW(), NOW())`, [sample_id, ...values]);
+    await query(`INSERT INTO form_tpa_entries (sample_id, ${colList}, created_at, updated_at) VALUES (?, ${placeholders}, NOW(), NOW())`, [sample_id, ...values]);
   }
 };
 
 exports.getBySampleId = async (sample_id) => {
-  const rows = await query('SELECT * FROM form_a_entries WHERE sample_id = ?', [sample_id]);
+  const rows = await query('SELECT * FROM form_tpa_entries WHERE sample_id = ?', [sample_id]);
   if (!rows[0]) return null;
   return rows[0];
 };
 
-exports.listJoinFormB = async () => {
+// List for export summary: join samples with TPA
+exports.listAll = async () => {
   return await query(`
     SELECT s.sample_id,
-           a.*,
-           b.notes AS b_notes, b.approved AS b_approved, b.qc_pass AS b_qc_pass
+           tpa.*
     FROM samples s
-    LEFT JOIN form_a_entries a ON a.sample_id = s.sample_id
-    LEFT JOIN form_b_entries b ON b.sample_id = s.sample_id
+    LEFT JOIN form_tpa_entries tpa ON tpa.sample_id = s.sample_id
     ORDER BY s.id DESC
   `);
 };
