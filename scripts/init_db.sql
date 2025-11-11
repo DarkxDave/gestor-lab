@@ -182,29 +182,10 @@ CREATE TABLE IF NOT EXISTS form_ram_entries (
   mic_fecha_entrega DATE NULL,
   mic_hora_entrega TIME NULL,
 
-  -- Muestrario
-  muestrario_muestra_rep_1 VARCHAR(50) NULL,
-  muestrario_muestra_rep_2 VARCHAR(50) NULL,
-  muestrario_dil_1 VARCHAR(50) NULL,
-  muestrario_dil_2 VARCHAR(50) NULL,
-  muestrario_c1_1 VARCHAR(50) NULL,
-  muestrario_c1_2 VARCHAR(50) NULL,
-  muestrario_c2_1 VARCHAR(50) NULL,
-  muestrario_c2_2 VARCHAR(50) NULL,
-  muestrario_sumc_1 VARCHAR(50) NULL,
-  muestrario_sumc_2 VARCHAR(50) NULL,
-  muestrario_d_1 VARCHAR(50) NULL,
-  muestrario_d_2 VARCHAR(50) NULL,
-  muestrario_n1_1 VARCHAR(50) NULL,
-  muestrario_n1_2 VARCHAR(50) NULL,
-  muestrario_n2_1 VARCHAR(50) NULL,
-  muestrario_n2_2 VARCHAR(50) NULL,
-  muestrario_x_1 VARCHAR(50) NULL,
-  muestrario_x_2 VARCHAR(50) NULL,
-  muestrario_resultado_ram_1 VARCHAR(100) NULL,
-  muestrario_resultado_ram_2 VARCHAR(100) NULL,
-  muestrario_resultado_rpes_1 VARCHAR(100) NULL,
-  muestrario_resultado_rpes_2 VARCHAR(100) NULL,
+  -- Datos (reemplaza Muestrario)
+  datos_suspension_inicial_den VARCHAR(50) NULL,
+  datos_volumen_petri_ml VARCHAR(50) NULL,
+  
 
   -- Notas
   notes TEXT NULL,

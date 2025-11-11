@@ -19,12 +19,15 @@ npm install
 
 ## Base de datos (phpMyAdmin)
 1. Abrir phpMyAdmin (http://localhost/phpmyadmin).
-2. Importar `scripts/init_db.sql` para crear la base `gestor_lab` y las tablas.
+2. Importar `scripts/init_db.sql`.
 
 Alternativa por CLI (si tiene `mysql` en PATH):
 ```powershell
 mysql -h localhost -P 3306 -u root -p < .\scripts\init_db.sql
 ```
+
+### Sin migraciones incrementales
+Este proyecto se instala limpio con un único script baseline (`init_db.sql`). Se eliminaron los SQL de `scripts/migrations/` para evitar confusión. Si realiza cambios al esquema, actualice el baseline y commitee.
 
 ## Ejecutar en desarrollo
 ```powershell
