@@ -185,6 +185,43 @@ CREATE TABLE IF NOT EXISTS form_ram_entries (
   -- Datos (reemplaza Muestrario)
   datos_suspension_inicial_den VARCHAR(50) NULL,
   datos_volumen_petri_ml VARCHAR(50) NULL,
+  -- Datos detallados RAM: dilución y colonias por fila (1..5)
+  datos_dilucion_log10_1 VARCHAR(10) NULL,
+  -- Fila 1
+  datos_colonias_num_a_1 VARCHAR(20) NULL,
+  datos_colonias_num_b_1 VARCHAR(20) NULL,
+  datos_colonias_por_conf_a_1 VARCHAR(20) NULL,
+  datos_colonias_por_conf_b_1 VARCHAR(20) NULL,
+  datos_colonias_conf_a_1 VARCHAR(20) NULL,
+  datos_colonias_conf_b_1 VARCHAR(20) NULL,
+  -- Fila 2
+  datos_colonias_num_a_2 VARCHAR(20) NULL,
+  datos_colonias_num_b_2 VARCHAR(20) NULL,
+  datos_colonias_por_conf_a_2 VARCHAR(20) NULL,
+  datos_colonias_por_conf_b_2 VARCHAR(20) NULL,
+  datos_colonias_conf_a_2 VARCHAR(20) NULL,
+  datos_colonias_conf_b_2 VARCHAR(20) NULL,
+  -- Fila 3
+  datos_colonias_num_a_3 VARCHAR(20) NULL,
+  datos_colonias_num_b_3 VARCHAR(20) NULL,
+  datos_colonias_por_conf_a_3 VARCHAR(20) NULL,
+  datos_colonias_por_conf_b_3 VARCHAR(20) NULL,
+  datos_colonias_conf_a_3 VARCHAR(20) NULL,
+  datos_colonias_conf_b_3 VARCHAR(20) NULL,
+  -- Fila 4
+  datos_colonias_num_a_4 VARCHAR(20) NULL,
+  datos_colonias_num_b_4 VARCHAR(20) NULL,
+  datos_colonias_por_conf_a_4 VARCHAR(20) NULL,
+  datos_colonias_por_conf_b_4 VARCHAR(20) NULL,
+  datos_colonias_conf_a_4 VARCHAR(20) NULL,
+  datos_colonias_conf_b_4 VARCHAR(20) NULL,
+  -- Fila 5
+  datos_colonias_num_a_5 VARCHAR(20) NULL,
+  datos_colonias_num_b_5 VARCHAR(20) NULL,
+  datos_colonias_por_conf_a_5 VARCHAR(20) NULL,
+  datos_colonias_por_conf_b_5 VARCHAR(20) NULL,
+  datos_colonias_conf_a_5 VARCHAR(20) NULL,
+  datos_colonias_conf_b_5 VARCHAR(20) NULL,
   
 
   -- Notas

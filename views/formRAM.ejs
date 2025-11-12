@@ -262,7 +262,7 @@
           </div>
           <div class="col-md-6">
             <label class="form-label">Dilución (log10) fila 1</label>
-            <input type="text" id="dil_exp1" class="form-control" placeholder="Ej: -2 (para 10^-2)" value="">
+            <input type="text" id="dil_exp1" name="datos_dilucion_log10_1" class="form-control" placeholder="Ej: -2 (para 10^-2)" value="<%= (data && data.datos_dilucion_log10_1) || '' %>">
             <div class="form-text">Las siguientes filas se calculan restando 1 por fila.</div>
           </div>
         </div>

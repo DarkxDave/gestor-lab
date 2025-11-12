@@ -50,6 +50,24 @@ const columns = [
   // Datos (antes Muestrario)
   'datos_suspension_inicial_den',
   'datos_volumen_petri_ml',
+  // Datos - nuevas columnas por dilución (1..5)
+  'datos_dilucion_log10_1',
+  // Colonias por fila (A/B): crudo, por confirmar, confirmadas
+  'datos_colonias_num_a_1','datos_colonias_num_b_1',
+  'datos_colonias_por_conf_a_1','datos_colonias_por_conf_b_1',
+  'datos_colonias_conf_a_1','datos_colonias_conf_b_1',
+  'datos_colonias_num_a_2','datos_colonias_num_b_2',
+  'datos_colonias_por_conf_a_2','datos_colonias_por_conf_b_2',
+  'datos_colonias_conf_a_2','datos_colonias_conf_b_2',
+  'datos_colonias_num_a_3','datos_colonias_num_b_3',
+  'datos_colonias_por_conf_a_3','datos_colonias_por_conf_b_3',
+  'datos_colonias_conf_a_3','datos_colonias_conf_b_3',
+  'datos_colonias_num_a_4','datos_colonias_num_b_4',
+  'datos_colonias_por_conf_a_4','datos_colonias_por_conf_b_4',
+  'datos_colonias_conf_a_4','datos_colonias_conf_b_4',
+  'datos_colonias_num_a_5','datos_colonias_num_b_5',
+  'datos_colonias_por_conf_a_5','datos_colonias_por_conf_b_5',
+  'datos_colonias_conf_a_5','datos_colonias_conf_b_5',
   // Notas
   'notes',
   'observaciones',

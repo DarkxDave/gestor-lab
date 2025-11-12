@@ -113,13 +113,13 @@ exports.exportAll = async (req, res, next) => {
   try {
     const sample_id = req.query.sample_id || null;
     const wb = new ExcelJS.Workbook();
-    if (sample_id) {
+  if (sample_id) {
       // Per-sample workbook: use the pretty TPA layout helper
       await require('./exportTPAController').addPrettySheetForSample(wb, sample_id);
       // RAM detailed sheet via controller helper
-      const ramCtrl = require('./exportRAMController');
-      await ramCtrl.addSheetForSample(wb, sample_id);
-      await ramCtrl.addProvisorioSheetForSample(wb, sample_id);
+  const ramCtrl = require('./exportRAMController');
+  await ramCtrl.addSheetForSample(wb, sample_id);
+  // Hoja 'ram_provisorio' eliminada.
     } else {
       // Summary workbook: all samples multi-sheet
       await buildTPASheet(wb);
