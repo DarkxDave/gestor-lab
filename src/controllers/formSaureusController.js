@@ -1,4 +1,4 @@
-const model = require('../models/formSaureus');
+const model = require('../models/saureusFormModel');
 
 exports.renderForm = async (req, res) => {
   const sampleId = req.query.sample_id || '';

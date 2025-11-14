@@ -1,4 +1,4 @@
-const model = require('../models/formCTCFE');
+const model = require('../models/ctcfeFormModel');
 
 exports.renderForm = async (req, res) => {
   const sampleId = req.query.sample_id || '';

@@ -1,5 +1,5 @@
 const ExcelJS = require('exceljs');
-const model = require('../models/formSaureus');
+const model = require('../models/saureusFormModel');
 
 exports.exportSaureusForm = async (req, res, next) => {
   try {

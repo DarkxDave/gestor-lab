@@ -1,5 +1,5 @@
 const ExcelJS = require('exceljs');
-const model = require('../models/formCTCFE');
+const model = require('../models/ctcfeFormModel');
 
 exports.exportCTCFEForm = async (req, res, next) => {
   try {

@@ -1,5 +1,5 @@
 const ExcelJS = require('exceljs');
-const model = require('../models/formEntero');
+const model = require('../models/enteroFormModel');
 
 exports.exportEnteroForm = async (req, res, next) => {
   try {

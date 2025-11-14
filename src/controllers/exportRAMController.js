@@ -1,7 +1,7 @@
 const ExcelJS = require('exceljs');
-const ramModel = require('../models/formRAM');
+const ramModel = require('../models/ramFormModel');
 
-// Reusable: add a RAM sheet for a given sample into an existing workbook
+// Reutilizable: añade una hoja RAM para un sample dado en un workbook existente
 exports.addSheetForSample = async (wb, sample_id, data) => {
   const ws = wb.addWorksheet('RAM');
   if (!data) data = await ramModel.getBySampleId(sample_id);
@@ -33,7 +33,7 @@ exports.addSheetForSample = async (wb, sample_id, data) => {
     return Number.isFinite(n) ? n : null;
   };
 
-  // Title + code
+  // Título + código norma
   ws.mergeCells('B1:K1');
   ws.getCell('B1').value = 'TRAZABILIDAD ANÁLISIS: ENUMERACIÓN DE AEROBIOS MESÓFILOS (NCh 2659.Of 2002)';
   ws.getCell('B1').alignment = { horizontal: 'center' };
@@ -44,7 +44,7 @@ exports.addSheetForSample = async (wb, sample_id, data) => {
   ws.getCell('B2').alignment = { horizontal: 'center' };
   ws.getCell('B2').font = { bold: true, size: 12 };
 
-  // ALI + sample id band (moved to center-left: D3 for ALI, E3:G3 for ID)
+  // ALI + sample id band (movido al centro-izquierda: D3 para ALI, E3:G3 para ID)
   ws.mergeCells('E3:G3');
   const idCell = ws.getCell('E3');
   idCell.value = `${sample_id}`;
@@ -56,17 +56,17 @@ exports.addSheetForSample = async (wb, sample_id, data) => {
   const ali = ws.getCell('D3'); ali.value = 'ALI'; ali.alignment = { horizontal: 'center', vertical: 'middle' }; ali.font = { bold: true };
   setBorder(3, 4, 3, 4);
 
-  // Column widths for main content area (B..K)
+  // Anchos de columnas para área principal (B..K)
   ws.getColumn(2).width = 28; // B labels
   for (let c = 1; c <= 26; c++) ws.getColumn(c).width = 14;
 
-  // Section: Fechas y análisis
-  // Achicar L, M, N, O como la columna D
+  // Sección: Fechas y análisis
+  // Achicar L, M, N, O
   ws.getColumn(12).width = 4; // L
   ws.getColumn(13).width = 4; // M
   ws.getColumn(14).width = 4; // N
   ws.getColumn(15).width = 4; // O
-  // Ajuste de ancho para columnas auxiliares S, V, Z
+  // Ajuste de ancho para columnas S, V, Z
   ws.getColumn(19).width = 18; // S
   ws.getColumn(22).width = 18; // V
   ws.getColumn(26).width = 18; // Z
@@ -82,10 +82,10 @@ exports.addSheetForSample = async (wb, sample_id, data) => {
   ws.getCell('H8').value = 'Hora'; ws.mergeCells('I8:J8'); ws.getCell('I8').value = data.termino_analisis_hora || '';
   ws.getCell('H9').value = 'Analista'; ws.mergeCells('I9:K9'); ws.getCell('I9').value = data.termino_analisis_analista || '';
   setBorder(6, 2, 9, 11);
-  // Clear specific borders requested: E7, F7, G7, K7 and E8, F8, G8, K8
+  // Limpiar bordes específicos: E7, F7, G7, K7 y E8, F8, G8, K8
   ['E7','F7','G7','K7','E8','F8','G8','K8'].forEach(addr => { ws.getCell(addr).border = undefined; });
 
-  // Section: Set de Análisis (reemplaza Control Ambiental y CC2)
+  // Sección: Set de Análisis
   ws.mergeCells('B11:K11'); ws.getCell('B11').value = 'Set de Análisis'; ws.getCell('B11').alignment = { horizontal: 'center' }; ws.getCell('B11').font = { bold: true };
   // Fila 1
   ws.getCell('B12').value = 'Control Ambiental Pesado: T°:'; ws.getCell('C12').value = data.cc2_pesado_temp || '';
@@ -99,10 +99,10 @@ exports.addSheetForSample = async (wb, sample_id, data) => {
   ws.getCell('B14').value = 'Control de siembra E. Coli (UFC):'; ws.mergeCells('C14:D14'); ws.getCell('C14').value = data.cc2_ecoli_ufc || '';
   ws.getCell('E14').value = 'Blanco (UFC):'; ws.mergeCells('F14:K14'); ws.getCell('F14').value = data.cc2_blanco_ufc || '';
   setBorder(12, 2, 14, 11);
-  // Clear extra boxes on row 13 at I, J, K
+  // Limpiar casillas extras en fila 13 en I, J, K
   ['I13','J13','K13'].forEach(addr => { const cell = ws.getCell(addr); cell.value = ''; cell.border = undefined; });
 
-  // Section: Siembra
+  // Sección: Siembra
   ws.mergeCells('B16:K16'); ws.getCell('B16').value = 'Siembra'; ws.getCell('B16').alignment = { horizontal: 'center' }; ws.getCell('B16').font = { bold: true };
   ws.mergeCells('B17:J17'); ws.getCell('B17').value = 'Tiempo entre homogenizado y siembra < 15 minutos'; ws.getCell('K17').value = check(data.siembra_tiempo_ok);
   ws.mergeCells('E18:H18'); ws.getCell('E18').value = 'N° de Muestra (10gr/90ml)'; ws.mergeCells('I18:K18'); ws.getCell('I18').value = data.siembra_n_muestra_10g_90ml || '';
@@ -125,7 +125,7 @@ exports.addSheetForSample = async (wb, sample_id, data) => {
   ws.mergeCells('B28:E28'); ws.getCell('B28').value = 'Volumen/Petri dish [mL]:';
   ws.getCell('F28').value = data.datos_volumen_petri_ml || '';
 
-  // Encabezados de tabla (alineados con ram_provisorio)
+  // Encabezados de tabla de recuento de colonias
   ws.mergeCells('B31:B32'); ws.getCell('B31').value = 'Dilusión'; ws.getCell('B31').alignment = { horizontal: 'center', vertical: 'middle' }; ws.getCell('B31').font = { bold: true };
   ws.mergeCells('C31:E31'); ws.getCell('C31').value = 'Numero de colonias'; ws.getCell('C31').alignment = { horizontal: 'center' }; ws.getCell('C31').font = { bold: true };
   ws.mergeCells('F31:G31'); ws.getCell('F31').value = ' Colonias por Confirmar'; ws.getCell('F31').alignment = { horizontal: 'center' }; ws.getCell('F31').font = { bold: true };
@@ -170,7 +170,7 @@ exports.addSheetForSample = async (wb, sample_id, data) => {
   ws.getCell('E38').font = { bold: true }; ws.getCell('E38').alignment = { horizontal: 'center' }; ws.getCell('E38').numFmt = '0.0E+00';
   ws.getCell('E38').border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
 
-  // Preguntas y respuestas (5 paralelas + 1 entre diluciones) y Observaciones reubicadas
+  // Preguntas y respuestas (5 paralelas + 1 entre diluciones) y Observaciones
   // Paralelo 1ª dilución
   ws.mergeCells('B40:I40'); ws.getCell('B40').value = '¿Es aceptable la diferencia de recuentos entre placas usadas en paralelo en la primera dilución?'; ws.getCell('B40').alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
   const a40 = ws.getCell('J40'); a40.font = { bold: true }; a40.alignment = { horizontal: 'center', vertical: 'middle' }; a40.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF00' } }; a40.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
@@ -190,7 +190,7 @@ exports.addSheetForSample = async (wb, sample_id, data) => {
   ws.mergeCells('B50:G50'); ws.getCell('B50').value = '¿Es aceptable la diferencia de recuentos entre diluciones?'; ws.getCell('B50').alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
   ws.mergeCells('H50:I50'); const a50 = ws.getCell('H50'); a50.font = { bold: true }; a50.alignment = { horizontal: 'center', vertical: 'middle' }; a50.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF00' } }; a50.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
 
-  // Observaciones (ahora en B52)
+  // Observaciones
   ws.getCell('B52').value = 'Observaciones'; ws.mergeCells('C52:K56'); ws.getCell('C52').value = data.observaciones || ''; ws.getCell('C52').alignment = { vertical: 'top', wrapText: true };
   setBorder(52, 3, 56, 11);
 
@@ -198,7 +198,7 @@ exports.addSheetForSample = async (wb, sample_id, data) => {
   ws.mergeCells('B58:E58'); ws.getCell('B58').value = '';
   ws.getCell('B59').value = 'FIRMA COORDINADOR DE ÁREA'; ws.getCell('B59').alignment = { horizontal: 'center' }; ws.getCell('B59').font = { bold: true };
 
-  // Ajustes de anchos auxiliares para esta hoja
+  // Ajustes de anchos auxiliares
   ws.getColumn(16).width = 30; // P
   ws.getColumn(22).width = 18; // V
   ws.getColumn(26).width = 18; // Z
@@ -244,7 +244,7 @@ exports.addSheetForSample = async (wb, sample_id, data) => {
   ws.getCell('V33').value = 'CHISQmin';
   ;['V25','V26','V29','V30','V31','V32','V33'].forEach(addr => { ws.getCell(addr).font = { bold: true }; });
 
-  // Celdas auxiliares Q/T/W/X con fórmulas desplazadas
+  // Celdas auxiliares Q/T/W/X con fórmulas
   ws.getCell('E38').value = { formula: 'IF(T25="NO","Correct dilution factor",IF(Q25="NO","Error. Missingdata",IF(Q26="NO","",IF(T27="NO","",Q43))))' };
   // Aceptación paralelo 1ª..5ª y entre diluciones (J40,J42,J44,J46,J48,H50)
   ws.getCell('J40').value = { formula: 'IF(E38="","",IF(Q31=0,"NOT APPLICABLE",IF(Q40<2,"NOT APPLICABLE",IF(Q33>1-Q44,"YES","NO"))))' };
@@ -291,7 +291,7 @@ exports.addSheetForSample = async (wb, sample_id, data) => {
   ws.getCell('X25').value = { formula: 'ROUND(X26,0)' };
   ws.getCell('X26').value = { formula: 'RIGHT(C33,2)' };
 
-  // Bloques adicionales de duplicados para 3ra, 4ta y 5ta dilución (labels en S; cálculos en T)
+  // Cálculos de chi-cuadrado para diluciones 3ra, 4ta y 5ta en columna T
   // 3ra dilución (fila de datos 35)
   ws.getCell('S37').value = '3ra dilusion';
   ws.getCell('S38').value = 'MIN';
@@ -328,7 +328,7 @@ exports.addSheetForSample = async (wb, sample_id, data) => {
   ws.getCell('T50').value = { formula: '2*(T48*LN(IF(T48=0,1,T48)/AVERAGE(T48:T49))+T49*LN(T49/AVERAGE(T48:T49)))' };
   ws.getCell('T51').value = { formula: '1-CHISQ.DIST(T50,1,TRUE)' };
 
-  // Aceptación (paralelo) para 3ra–5ta dilución en RAM (resultados tipo J40/J42)
+  // Aceptación para 3ra–5ta dilución en RAM
   ws.getCell('R37').value = 'OK 3ra'; ws.getCell('R37').font = { bold: true };
   ws.getCell('R41').value = { formula: 'IF(E38="","",IF(MAX(C35:E35)=0,"NOT APPLICABLE",IF(COUNTA(C35:E35)<2,"NOT APPLICABLE",IF(T41>1-Q44,"YES","NO"))))' };
   ws.getCell('R42').value = 'OK 4ta'; ws.getCell('R42').font = { bold: true };
@@ -347,7 +347,6 @@ exports.exportRAMForm = async (req, res, next) => {
     const data = await ramModel.getBySampleId(sample_id);
     const wb = new ExcelJS.Workbook();
     await exports.addSheetForSample(wb, sample_id, data);
-  // Provisional sheet eliminado según requerimiento (solo hoja RAM principal)
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename="RAM_${sample_id}.xlsx"`);

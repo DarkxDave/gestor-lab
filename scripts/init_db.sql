@@ -8,10 +8,6 @@ CREATE TABLE IF NOT EXISTS samples (
   sample_id VARCHAR(100) NOT NULL UNIQUE
 ) ENGINE=InnoDB;
 
--- Formularios nuevos con sample_id como PRIMARY KEY
-DROP TABLE IF EXISTS form_a_entries;
-DROP TABLE IF EXISTS form_b_entries;
-
 -- TPA
 DROP TABLE IF EXISTS form_tpa_entries;
 CREATE TABLE IF NOT EXISTS form_tpa_entries (
@@ -182,7 +178,7 @@ CREATE TABLE IF NOT EXISTS form_ram_entries (
   mic_fecha_entrega DATE NULL,
   mic_hora_entrega TIME NULL,
 
-  -- Datos (reemplaza Muestrario)
+  -- Datos 
   datos_suspension_inicial_den VARCHAR(50) NULL,
   datos_volumen_petri_ml VARCHAR(50) NULL,
   -- Datos detallados RAM: dilución y colonias por fila (1..5)
@@ -222,7 +218,6 @@ CREATE TABLE IF NOT EXISTS form_ram_entries (
   datos_colonias_por_conf_b_5 VARCHAR(20) NULL,
   datos_colonias_conf_a_5 VARCHAR(20) NULL,
   datos_colonias_conf_b_5 VARCHAR(20) NULL,
-  
 
   -- Notas
   notes TEXT NULL,

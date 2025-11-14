@@ -1,4 +1,4 @@
-const tpaModel = require('../models/formTPA');
+const tpaModel = require('../models/tpaFormModel');
 
 exports.renderForm = async (req, res) => {
   const sampleId = req.query.sample_id || '';

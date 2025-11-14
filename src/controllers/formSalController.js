@@ -1,4 +1,4 @@
-const model = require('../models/formSal');
+const model = require('../models/salFormModel');
 
 exports.renderForm = async (req, res) => {
   const sampleId = req.query.sample_id || '';

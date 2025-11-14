@@ -1,0 +1,137 @@
+const { query } = require('../db');
+const samples = require('./sampleModel');
+
+// Columns present in form_ram_entries corresponding to form field names
+const columns = [
+  // Fechas y análisis
+  'inicio_incubacion_fecha',
+  'inicio_incubacion_hora',
+  'inicio_incubacion_analista',
+  'termino_analisis_fecha',
+  'termino_analisis_hora',
+  'termino_analisis_analista',
+  // Control Ambiental
+  'ca_pesado_temp',
+  'ca_pesado_ufc',
+  'ca_siembra',
+  'ca_ecoli_ufc',
+  'ca_blanco_ufc',
+  // Siembra
+  'siembra_tiempo_ok',
+  'siembra_tiempo_minutos',
+  'siembra_n_muestra_10g_90ml',
+  'siembra_n_muestra_50g_450ml',
+  // Controles de Calidad
+  'cc_duplicado_ali_detalle',
+  'cc_duplicado_ali_analisis',
+  'cc_duplicado_ali_cumple',
+  'cc_control_pos_blanco_ali_detalle',
+  'cc_control_pos_blanco_ali_analisis',
+  'cc_control_pos_blanco_ali_cumple',
+  'cc_control_siembra_ali_detalle',
+  'cc_control_siembra_ali_analisis',
+  'cc_control_siembra_ali_cumple',
+  // Control de Calidad 2
+  'cc2_pesado_temp',
+  'cc2_pesado_ufc',
+  'cc2_siembra',
+  'cc2_hora_inicio',
+  'cc2_hora_termino',
+  'cc2_temp',
+  'cc2_ecoli_ufc',
+  'cc2_blanco_ufc',
+  // MIC
+  'mic_desfavorable_si',
+  'mic_desfavorable_no',
+  'mic_tabla_pagina',
+  'mic_limite',
+  'mic_fecha_entrega',
+  'mic_hora_entrega',
+  // Datos (antes Muestrario)
+  'datos_suspension_inicial_den',
+  'datos_volumen_petri_ml',
+  // Datos - nuevas columnas por dilución (1..5)
+  'datos_dilucion_log10_1',
+  // Colonias por fila (A/B): crudo, por confirmar, confirmadas
+  'datos_colonias_num_a_1','datos_colonias_num_b_1',
+  'datos_colonias_por_conf_a_1','datos_colonias_por_conf_b_1',
+  'datos_colonias_conf_a_1','datos_colonias_conf_b_1',
+  'datos_colonias_num_a_2','datos_colonias_num_b_2',
+  'datos_colonias_por_conf_a_2','datos_colonias_por_conf_b_2',
+  'datos_colonias_conf_a_2','datos_colonias_conf_b_2',
+  'datos_colonias_num_a_3','datos_colonias_num_b_3',
+  'datos_colonias_por_conf_a_3','datos_colonias_por_conf_b_3',
+  'datos_colonias_conf_a_3','datos_colonias_conf_b_3',
+  'datos_colonias_num_a_4','datos_colonias_num_b_4',
+  'datos_colonias_por_conf_a_4','datos_colonias_por_conf_b_4',
+  'datos_colonias_conf_a_4','datos_colonias_conf_b_4',
+  'datos_colonias_num_a_5','datos_colonias_num_b_5',
+  'datos_colonias_por_conf_a_5','datos_colonias_por_conf_b_5',
+  'datos_colonias_conf_a_5','datos_colonias_conf_b_5',
+  // Notas
+  'notes',
+  'observaciones',
+];
+
+const booleanFields = new Set([
+  'siembra_tiempo_ok',
+  'mic_desfavorable_si',
+  'mic_desfavorable_no',
+]);
+
+const tinyintFields = new Set([
+  'cc_duplicado_ali_cumple',
+  'cc_control_pos_blanco_ali_cumple',
+  'cc_control_siembra_ali_cumple',
+]);
+
+function normalizeValue(key, val) {
+  if (booleanFields.has(key)) {
+    return val ? 1 : 0;
+  }
+  if (tinyintFields.has(key)) {
+    if (val === undefined || val === null || val === '') return null;
+    return String(val) === '1' ? 1 : 0;
+  }
+  if (key === 'siembra_tiempo_minutos') {
+    if (val === undefined || val === null || val === '') return null;
+    const n = Number(val);
+    return Number.isFinite(n) ? n : null;
+  }
+  if (val === undefined || val === null || val === '') return null;
+  return val;
+}
+
+exports.save = async (sample_id, data = {}) => {
+  await samples.ensureSample(sample_id);
+
+  const vals = columns.map((c) => normalizeValue(c, data[c]));
+
+  const colList = columns.join(', ');
+  const placeholders = columns.map(() => '?').join(', ');
+  const updates = columns.map((c) => `${c}=VALUES(${c})`).join(', ');
+
+  const sql = `
+    INSERT INTO form_ram_entries (sample_id, ${colList}, created_at, updated_at)
+    VALUES (?, ${placeholders}, NOW(), NOW())
+    ON DUPLICATE KEY UPDATE ${updates}, updated_at=NOW()
+  `;
+
+  await query(sql, [sample_id, ...vals]);
+};
+
+exports.getBySampleId = async (sample_id) => {
+  const rows = await query('SELECT * FROM form_ram_entries WHERE sample_id=?', [sample_id]);
+  return rows[0] || null;
+};
+
+// Listado para resumen de exportación: unir samples con RAM
+exports.listAll = async () => {
+  return await query(`
+    SELECT s.sample_id,
+           ram.*
+    FROM samples s
+    LEFT JOIN form_ram_entries ram ON ram.sample_id = s.sample_id
+    ORDER BY s.id DESC
+  `);
+};

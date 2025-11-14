@@ -12,9 +12,9 @@
 			sampleId = window.prompt('Ingrese sample_id para exportar:','1') || '';
 			sampleId = sampleId.trim();
 		}
-		if (!sampleId) return;
-		// Export consolidated per-sample (TPA, RAM, y futuros)
-		window.location.href = `/export/excel-all?sample_id=${encodeURIComponent(sampleId)}`;
+			if (!sampleId) return;
+				// Export bundle: all forms for the sample_id in one workbook
+				window.location.href = `/export/all-forms?sample_id=${encodeURIComponent(sampleId)}`;
 	}
 	document.addEventListener('click', function(e){
 		const a = e.target.closest('[data-export-tpa]');

@@ -1,5 +1,5 @@
-const ramModel = require('../models/formRAM');
-const samples = require('../models/samples');
+const ramModel = require('../models/ramFormModel');
+const samples = require('../models/sampleModel');
 
 exports.renderForm = async (req, res) => {
   const sampleId = req.query.sample_id || '';

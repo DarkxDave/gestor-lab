@@ -1,4 +1,4 @@
-const model = require('../models/formEntero');
+const model = require('../models/enteroFormModel');
 
 exports.renderForm = async (req, res) => {
   const sampleId = req.query.sample_id || '';

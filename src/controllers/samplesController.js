@@ -1,4 +1,4 @@
-const samplesModel = require('../models/samples');
+const samplesModel = require('../models/sampleModel');
 
 exports.list = async (req, res, next) => {
   try {

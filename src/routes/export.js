@@ -7,10 +7,10 @@ const exportCTCFEController = require('../controllers/exportCTCFEController');
 const exportRMyLController = require('../controllers/exportRMyLController');
 const exportSalController = require('../controllers/exportSalController');
 const exportSaureusController = require('../controllers/exportSaureusController');
-const exportMultiController = require('../controllers/exportMultiController');
+const exportAllController = require('../controllers/exportAllController');
 
 router.get('/excel', exportTPAController.exportExcel);
-router.get('/excel-all', exportMultiController.exportAll);
+router.get('/all-forms', exportAllController.exportAllForms);
 router.get('/tpa-form', exportTPAController.exportTPAForm);
 router.get('/ram-form', exportRAMController.exportRAMForm);
 router.get('/entero-form', exportEnteroController.exportEnteroForm);

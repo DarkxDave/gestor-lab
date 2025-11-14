@@ -11,7 +11,7 @@
     <a class="btn btn-outline-secondary" href="/samples">Muestras</a>
   </div>
   <div class="col-auto">
-    <a class="btn btn-outline-success" href="#" data-export-tpa>Exportar Excel</a>
+    <a class="btn btn-outline-success" href="<%= sampleId ? ('/export/all-forms?sample_id=' + encodeURIComponent(sampleId)) : '#' %>" data-export-tpa>Exportar Excel</a>
   </div>
   <div class="col-auto">
     <button class="btn btn-outline-primary" type="button" id="btnSaveAll">Guardar en todas</button>
@@ -20,7 +20,7 @@
 
 <%- include('partials/formTabs', { active: 'ram', sampleId }) %>
 
-<!-- Encabezado visual como en TPA: title y code -->
+<!-- Encabezado visual -->
 <div class="card p-3 mb-3">
   <div class="row g-2 align-items-center">
     <div class="col-12">
@@ -32,7 +32,7 @@
   </div>
 </div>
 
-<!-- Banda de ID similar a TPA -->
+<!-- Banda de ID -->
 <div class="card p-3 mb-4">
   <div class="row g-2 align-items-center">
     <div class="col-auto"><div class="border fw-bold px-3 py-2">ALI</div></div>
@@ -40,7 +40,7 @@
   </div>
 </div>
 
-<!-- Cuerpo RAM (placeholder, mismo estilo de secciones que TPA) -->
+<!-- Cuerpo RAM -->
 <div class="card p-3 mb-4">
   <form method="post" action="/form-ram/save">
     <input type="hidden" name="sample_id" value="<%= sampleId || '' %>">
@@ -148,7 +148,7 @@
       </div>
     </div>
 
-    <!-- Controles de Calidad -->
+    <!-- Control de Calidad -->
     <div class="mb-4">
       <div class="bg-light border fw-bold text-center py-2 px-3 rounded-top">Controles de Calidad</div>
       <div class="border border-top-0 rounded-bottom p-3">
@@ -247,7 +247,7 @@
       </div>
     </div>
 
-    <!-- Datos (reemplaza Muestrario) -->
+    <!-- Datos -->
     <div class="mb-4">
       <div class="bg-light border fw-bold text-center py-2 px-3 rounded-top">Datos</div>
       <div class="border border-top-0 rounded-bottom p-3">
@@ -379,7 +379,7 @@
     });
   })();
 
-  // Cálculos en vivo (reflejan el Excel)
+  // Cálculos en vivo de RAM
   (function(){
     const $ = (sel, ctx=document) => ctx.querySelector(sel);
     const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));

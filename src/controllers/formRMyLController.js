@@ -1,4 +1,4 @@
-const model = require('../models/formRMyL');
+const model = require('../models/rmylFormModel');
 
 exports.renderForm = async (req, res) => {
   const sampleId = req.query.sample_id || '';

@@ -1,57 +1,32 @@
 const ExcelJS = require('exceljs');
-const tpaModel = require('../models/formTPA');
+const tpaModel = require('../models/tpaFormModel');
 
 function asCheck(v) {
   return (v === true || v === 1 || v === '1') ? '✓' : '';
 }
 
-// Reusable helper: add the PRETTY TPA sheet for a single sample into an existing workbook
-exports.addPrettySheetForSample = async (wb, sample_id, rec) => {
-  if (!rec) {
-    rec = await tpaModel.getBySampleId(sample_id);
-  }
-  rec = rec || {};
 
+// Reusable helper: añade una hoja TPA a un workbook dado
+exports.addSheetForSample = async (wb, sample_id, rec) => {
+  if (!rec) rec = await tpaModel.getBySampleId(sample_id);
   const ws = wb.addWorksheet('TPA');
-  // Config base
-  ws.properties.defaultRowHeight = 18;
-  const borderThin = { style: 'thin', color: { argb: 'FF000000' } };
 
   // Helpers
-  const setBorder = (...args) => {
-    let r1, c1, r2, c2;
-    if (Array.isArray(args[0])) {
-      [r1, c1, r2, c2] = args[0];
-    } else {
-      [r1, c1, r2, c2] = args;
-    }
+  const check = (v) => asCheck(v);
+  const setBorder = (r1, c1, r2, c2) => {
     for (let r = r1; r <= r2; r++) {
       for (let c = c1; c <= c2; c++) {
-        const cell = ws.getCell(r, c);
-        cell.border = {
-          top: borderThin,
-          left: borderThin,
-          bottom: borderThin,
-          right: borderThin,
+        ws.getCell(r, c).border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' },
         };
       }
     }
   };
-  const check = (v) => (v === true || v === 1 || v === '1') ? '√' : '';
 
-  // Encabezado superior
-  ws.mergeCells('B1:T1');
-  ws.getCell('B1').value = 'TRAZABILIDAD Y ANÁLISIS';
-  ws.getCell('B1').alignment = { horizontal: 'center' };
-  ws.getCell('B1').font = { bold: true, size: 18 };
-
-  ws.mergeCells('B2:T2');
-  ws.getCell('B2').value = 'R-INS-MM-M-1-15 /23-08-23';
-  ws.getCell('B2').alignment = { horizontal: 'center' };
-  ws.getCell('B2').font = { bold: true, size: 12 };
-
-  // ID banda
-  ws.getCell('C3').value = '';
+  // ID band and ALI label
   ws.mergeCells('I3:K3');
   const idCell = ws.getCell('I3');
   idCell.value = `${sample_id}`;
@@ -59,12 +34,12 @@ exports.addPrettySheetForSample = async (wb, sample_id, rec) => {
   idCell.font = { bold: true, size: 14 };
   idCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' } };
   ws.getRow(3).height = 24;
-  setBorder([3, 9, 3, 11]); // I3..K3
+  setBorder(3, 9, 3, 11); // I3..K3
   const aliCell = ws.getCell('H3');
   aliCell.value = 'ALI';
   aliCell.alignment = { horizontal: 'center', vertical: 'middle' };
   aliCell.font = { bold: true };
-  setBorder([3, 8, 3, 8]);
+  setBorder(3, 8, 3, 8);
 
   // Anchos de columnas
   ws.getColumn(2).width = 35; // B
@@ -75,7 +50,7 @@ exports.addPrettySheetForSample = async (wb, sample_id, rec) => {
   ws.getColumn(7).width = 8;  // G
   ws.getColumn(8).width = 40; // H
 
-  // Bloque Almacenamiento + Observaciones
+  // Almacenamiento + Observaciones
   ws.mergeCells('B5:G5');
   ws.getCell('B5').value = 'Lugar de almacenamiento de muestras:';
   ws.getCell('B5').alignment = { horizontal: 'center' };
@@ -86,7 +61,7 @@ exports.addPrettySheetForSample = async (wb, sample_id, rec) => {
   ws.getCell('H5').alignment = { vertical: 'top' };
   ws.getCell('H5').font = { bold: true };
 
-  setBorder([5, 2, 9, 8]); // B5..H9
+  setBorder(5, 2, 9, 8); // B5..H9
 
   const items = [
     ['Frezeer 33-M', 'storage_freezer_33m'],
@@ -98,10 +73,10 @@ exports.addPrettySheetForSample = async (wb, sample_id, rec) => {
     ws.mergeCells(`${addr}:F${6 + i}`);
     ws.getCell(addr).value = items[i][0];
     ws.getCell(addr).alignment = { horizontal: 'center' };
-    ws.getCell(`G${6 + i}`).value = check(rec[items[i][1]]);
+    ws.getCell(`G${6 + i}`).value = check(rec && rec[items[i][1]]);
     ws.getCell(`G${6 + i}`).alignment = { horizontal: 'center' };
   });
-  ws.getCell('H6').value = rec.observaciones || '';
+  ws.getCell('H6').value = (rec && rec.observaciones) || '';
   ws.getCell('H6').alignment = { wrapText: true, vertical: 'top' };
 
   // Columnas adicionales
@@ -124,7 +99,7 @@ exports.addPrettySheetForSample = async (wb, sample_id, rec) => {
   ws.getCell('B11').alignment = { horizontal: 'center' };
   ws.getCell('B11').font = { bold: true, size: 12 };
 
-  // Encabezados de tabla
+  // Encabezados de tabla (manipulación 1)
   ws.mergeCells('B12:B13'); ws.getCell('B12').value = 'Retiro de Muestra'; ws.getCell('B12').alignment = { horizontal: 'center', vertical: 'middle' }; ws.getCell('B12').font = { bold: true };
   ws.mergeCells('C12:C13'); ws.getCell('C12').value = 'Pesado'; ws.getCell('C12').alignment = { horizontal: 'center', vertical: 'middle' }; ws.getCell('C12').font = { bold: true };
   ws.mergeCells('D12:F12'); ws.getCell('D12').value = 'Clave material pesado (*)'; ws.getCell('D12').alignment = { horizontal: 'center' }; ws.getCell('D12').font = { bold: true };
@@ -145,20 +120,21 @@ exports.addPrettySheetForSample = async (wb, sample_id, rec) => {
   ];
   [14, 15, 16].forEach((r, i) => {
     const f = filas[i];
-    ws.getCell(`B${r}`).value = check(rec[f.retiro]);
-    ws.getCell(`C${r}`).value = check(rec[f.pesado]);
-    ws.getCell(`D${r}`).value = rec[f.cm1] || '';
-    ws.getCell(`E${r}`).value = rec[f.cm2] || '';
-    ws.getCell(`F${r}`).value = rec[f.cm3] || '';
-    ws.getCell(`G${r}`).value = rec[f.resp] || '';
-    ws.getCell(`H${r}`).value = (rec[f.fecha] instanceof Date) ? rec[f.fecha].toISOString().slice(0, 10) : (rec[f.fecha] || '');
-    ws.getCell(`I${r}`).value = rec[f.h1] || '';
-    ws.getCell(`J${r}`).value = rec[f.h2] || '';
-    ws.getCell(`K${r}`).value = rec[f.n] || '';
+    ws.getCell(`B${r}`).value = check(rec && rec[f.retiro]);
+    ws.getCell(`C${r}`).value = check(rec && rec[f.pesado]);
+    ws.getCell(`D${r}`).value = rec && rec[f.cm1] || '';
+    ws.getCell(`E${r}`).value = rec && rec[f.cm2] || '';
+    ws.getCell(`F${r}`).value = rec && rec[f.cm3] || '';
+    ws.getCell(`G${r}`).value = rec && rec[f.resp] || '';
+    const fechaVal = rec && rec[f.fecha];
+    ws.getCell(`H${r}`).value = (fechaVal instanceof Date) ? fechaVal.toISOString().slice(0, 10) : (fechaVal || '');
+    ws.getCell(`I${r}`).value = rec && rec[f.h1] || '';
+    ws.getCell(`J${r}`).value = rec && rec[f.h2] || '';
+    ws.getCell(`K${r}`).value = rec && rec[f.n] || '';
   });
-  setBorder([11, 2, 16, 11]);
+  setBorder(11, 2, 16, 11);
 
-  // Panel: Equipos para Pesado (B18..E)
+  // Equipos para Pesado (B18..E)
   ws.mergeCells('B18:E18'); ws.getCell('B18').value = 'Equipos para Pesado:'; ws.getCell('B18').alignment = { horizontal: 'center' }; ws.getCell('B18').font = { bold: true };
   const eqRows = [
     ['Balanza  74-M', 'equipo_balanza_74m'],
@@ -169,17 +145,17 @@ exports.addPrettySheetForSample = async (wb, sample_id, rec) => {
     ['Balanza  108-M', 'equipo_balanza_108m', true],
   ];
   eqRows.forEach((row, i) => {
-    const rr = 19 + i; // debajo del encabezado en 18
+    const rr = 19 + i;
     ws.mergeCells(`B${rr}:D${rr}`);
     ws.getCell(`B${rr}`).value = row[0];
     if (row[2]) ws.getCell(`B${rr}`).font = { bold: true };
     ws.getCell(`B${rr}`).alignment = { horizontal: 'center' };
-    ws.getCell(`E${rr}`).value = check(rec[row[1]]);
+    ws.getCell(`E${rr}`).value = check(rec && rec[row[1]]);
     ws.getCell(`E${rr}`).alignment = { horizontal: 'center' };
   });
   setBorder(18, 2, 24, 5); // B18..E24
 
-  // Panel: Lugar de almacenamiento (G18..I)
+  // Lugar de almacenamiento (G18..I)
   ws.mergeCells('G18:I18'); ws.getCell('G18').value = 'Lugar de almacenamiento:'; ws.getCell('G18').alignment = { horizontal: 'center' }; ws.getCell('G18').font = { bold: true };
   const locRows = [
     ['Frezeer 33-M', 'storage_freezer_33m'],
@@ -191,7 +167,7 @@ exports.addPrettySheetForSample = async (wb, sample_id, rec) => {
     ws.mergeCells(`G${rr}:H${rr}`);
     ws.getCell(`G${rr}`).value = row[0];
     ws.getCell(`G${rr}`).alignment = { horizontal: 'center' };
-    ws.getCell(`I${rr}`).value = check(rec[row[1]]);
+    ws.getCell(`I${rr}`).value = check(rec && rec[row[1]]);
     ws.getCell(`I${rr}`).alignment = { horizontal: 'center' };
   });
   setBorder(18, 7, 21, 9); // G18..I21
@@ -212,31 +188,29 @@ exports.addPrettySheetForSample = async (wb, sample_id, rec) => {
 
   ws.getCell(`J${baseP + 2}`).value = '1ml /clave:';
   ws.mergeCells(`K${baseP + 2}:L${baseP + 2}`);
-  ws.getCell(`K${baseP + 2}`).value = rec.clave_1ml || '';
+  ws.getCell(`K${baseP + 2}`).value = (rec && rec.clave_1ml) || '';
 
   ws.getCell(`J${baseP + 3}`).value = '10 ml/clave:';
   ws.mergeCells(`K${baseP + 3}:L${baseP + 3}`);
-  ws.getCell(`K${baseP + 3}`).value = rec.clave_10ml || '';
+  ws.getCell(`K${baseP + 3}`).value = (rec && rec.clave_10ml) || '';
 
   ws.mergeCells(`J${baseP + 4}:J${baseP + 6}`);
   ws.getCell(`J${baseP + 4}`).value = 'Otros:';
   ws.getCell(`J${baseP + 4}`).alignment = { vertical: 'middle' };
   ws.mergeCells(`K${baseP + 4}:L${baseP + 6}`);
-  ws.getCell(`K${baseP + 4}`).value = rec.clave_otros || '';
+  ws.getCell(`K${baseP + 4}`).value = (rec && rec.clave_otros) || '';
   ws.getCell(`K${baseP + 4}`).alignment = { vertical: 'top', wrapText: true };
 
   setBorder(baseP, 10, baseP + 6, 12);
 
-  // ==============================
   // Uso y limpieza de Micropipetas
-  // ==============================
-  let r0 = baseP + 8; // start after previous block
+  let r0 = baseP + 8;
   ws.mergeCells(`B${r0}:K${r0}`);
   ws.getCell(`B${r0}`).value = 'Uso y limpieza de Micropipetas';
   ws.getCell(`B${r0}`).alignment = { horizontal: 'center' };
   ws.getCell(`B${r0}`).font = { bold: true };
 
-  // Sub-headers for 1 ml and 10 ml
+  // Sub-headers para 1 ml y 10 ml
   r0++;
   ws.mergeCells(`B${r0}:C${r0}`); ws.getCell(`B${r0}`).value = '1 ml'; ws.getCell(`B${r0}`).alignment = { horizontal: 'center' }; ws.getCell(`B${r0}`).font = { bold: true };
   ws.mergeCells(`E${r0}:F${r0}`); ws.getCell(`E${r0}`).value = '10 ml'; ws.getCell(`E${r0}`).alignment = { horizontal: 'center' }; ws.getCell(`E${r0}`).font = { bold: true };
@@ -260,30 +234,25 @@ exports.addPrettySheetForSample = async (wb, sample_id, rec) => {
   let maxRows = Math.max(mpLeft.length, mpRight.length);
   for (let i = 0; i < maxRows; i++) {
     const rr = r0 + 1 + i;
-    // Left (1 ml)
     if (mpLeft[i]) {
       ws.getCell(`B${rr}`).value = mpLeft[i][0];
-      ws.getCell(`C${rr}`).value = check(rec[mpLeft[i][1]]);
+      ws.getCell(`C${rr}`).value = check(rec && rec[mpLeft[i][1]]);
       ws.getCell(`C${rr}`).alignment = { horizontal: 'center' };
     }
-    // Right (10 ml)
     if (mpRight[i]) {
       ws.getCell(`E${rr}`).value = mpRight[i][0];
-      ws.getCell(`F${rr}`).value = check(rec[mpRight[i][1]]);
+      ws.getCell(`F${rr}`).value = check(rec && rec[mpRight[i][1]]);
       ws.getCell(`F${rr}`).alignment = { horizontal: 'center' };
     }
   }
-  // Claves at the side
   const clavesStart = r0 + 1;
-  ws.getCell(`H${clavesStart}`).value = 'Puntas/pipetas 1ml/clave'; ws.mergeCells(`I${clavesStart}:K${clavesStart}`); ws.getCell(`I${clavesStart}`).value = rec.clave_1ml || '';
-  ws.getCell(`H${clavesStart + 1}`).value = 'Puntas/pipetas 10ml/clave'; ws.mergeCells(`I${clavesStart + 1}:K${clavesStart + 1}`); ws.getCell(`I${clavesStart + 1}`).value = rec.clave_10ml || '';
-  ws.getCell(`H${clavesStart + 2}`).value = 'Otros'; ws.mergeCells(`I${clavesStart + 2}:K${clavesStart + 2}`); ws.getCell(`I${clavesStart + 2}`).value = rec.clave_otros || '';
+  ws.getCell(`H${clavesStart}`).value = 'Puntas/pipetas 1ml/clave'; ws.mergeCells(`I${clavesStart}:K${clavesStart}`); ws.getCell(`I${clavesStart}`).value = (rec && rec.clave_1ml) || '';
+  ws.getCell(`H${clavesStart + 1}`).value = 'Puntas/pipetas 10ml/clave'; ws.mergeCells(`I${clavesStart + 1}:K${clavesStart + 1}`); ws.getCell(`I${clavesStart + 1}`).value = (rec && rec.clave_10ml) || '';
+  ws.getCell(`H${clavesStart + 2}`).value = 'Otros'; ws.mergeCells(`I${clavesStart + 2}:K${clavesStart + 2}`); ws.getCell(`I${clavesStart + 2}`).value = (rec && rec.clave_otros) || '';
   setBorder(r0, 2, r0 + maxRows, 6);
   setBorder(r0, 8, r0 + 3, 11);
 
-  // ==============================
   // Limpieza
-  // ==============================
   let rL = r0 + maxRows + 2;
   ws.mergeCells(`B${rL}:K${rL}`); ws.getCell(`B${rL}`).value = 'Limpieza'; ws.getCell(`B${rL}`).alignment = { horizontal: 'center' }; ws.getCell(`B${rL}`).font = { bold: true };
   const limpRows = [
@@ -296,26 +265,21 @@ exports.addPrettySheetForSample = async (wb, sample_id, rec) => {
   let rr = rL + 1;
   limpRows.forEach(item => {
     ws.mergeCells(`B${rr}:E${rr}`); ws.getCell(`B${rr}`).value = item[0];
-    ws.getCell(`F${rr}`).value = check(rec[item[1]]); ws.getCell(`F${rr}`).alignment = { horizontal: 'center' };
+    ws.getCell(`F${rr}`).value = check(rec && rec[item[1]]); ws.getCell(`F${rr}`).alignment = { horizontal: 'center' };
     rr++;
   });
-  // Otros
-  ws.mergeCells(`B${rr}:E${rr}`); ws.getCell(`B${rr}`).value = 'Otros'; ws.mergeCells(`F${rr}:K${rr}`); ws.getCell(`F${rr}`).value = rec.limpieza_otros || '';
+  ws.mergeCells(`B${rr}:E${rr}`); ws.getCell(`B${rr}`).value = 'Otros'; ws.mergeCells(`F${rr}:K${rr}`); ws.getCell(`F${rr}`).value = (rec && rec.limpieza_otros) || '';
   rr++;
-  // Aerosol
-  ws.mergeCells(`B${rr}:E${rr}`); ws.getCell(`B${rr}`).value = 'Desinfectante en aerosol'; ws.getCell(`F${rr}`).value = check(rec.limpieza_aerosol); ws.getCell(`F${rr}`).alignment = { horizontal: 'center' };
+  ws.mergeCells(`B${rr}:E${rr}`); ws.getCell(`B${rr}`).value = 'Desinfectante en aerosol'; ws.getCell(`F${rr}`).value = check(rec && rec.limpieza_aerosol); ws.getCell(`F${rr}`).alignment = { horizontal: 'center' };
   rr++;
-  // Observaciones limpieza
-  ws.mergeCells(`B${rr}:E${rr}`); ws.getCell(`B${rr}`).value = 'Observaciones limpieza'; ws.mergeCells(`F${rr}:K${rr + 2}`); ws.getCell(`F${rr}`).value = rec.observaciones_limpieza || ''; ws.getCell(`F${rr}`).alignment = { vertical: 'top', wrapText: true };
+  ws.mergeCells(`B${rr}:E${rr}`); ws.getCell(`B${rr}`).value = 'Observaciones limpieza'; ws.mergeCells(`F${rr}:K${rr + 2}`); ws.getCell(`F${rr}`).value = (rec && rec.observaciones_limpieza) || ''; ws.getCell(`F${rr}`).alignment = { vertical: 'top', wrapText: true };
   setBorder(rL + 1, 2, rr + 2, 11);
 
-  // ==============================
   // Material y equipos de Siembra
-  // ==============================
   let rS = rr + 4;
   ws.mergeCells(`B${rS}:K${rS}`); ws.getCell(`B${rS}`).value = 'Material y equipos de Siembra'; ws.getCell(`B${rS}`).alignment = { horizontal: 'center' }; ws.getCell(`B${rS}`).font = { bold: true };
   rS++;
-  ws.getCell(`B${rS}`).value = 'Clave'; ws.mergeCells(`C${rS}:K${rS}`); ws.getCell(`C${rS}`).value = rec.clave_general || '';
+  ws.getCell(`B${rS}`).value = 'Clave'; ws.mergeCells(`C${rS}:K${rS}`); ws.getCell(`C${rS}`).value = (rec && rec.clave_general) || '';
   rS++;
   const siembraRows = [
     ['Puntas 1mL:', 'clave_puntas_1ml', 'Baño 5-M:', 'bano_5m', true],
@@ -328,17 +292,15 @@ exports.addPrettySheetForSample = async (wb, sample_id, rec) => {
   ];
   siembraRows.forEach(row => {
     const [l1, k1, l2, k2, isCheck2] = row;
-    ws.mergeCells(`B${rS}:D${rS}`); ws.getCell(`B${rS}`).value = l1; ws.mergeCells(`E${rS}:G${rS}`); ws.getCell(`E${rS}`).value = rec[k1] || '';
+    ws.mergeCells(`B${rS}:D${rS}`); ws.getCell(`B${rS}`).value = l1; ws.mergeCells(`E${rS}:G${rS}`); ws.getCell(`E${rS}`).value = (rec && rec[k1]) || '';
     ws.mergeCells(`H${rS}:J${rS}`); ws.getCell(`H${rS}`).value = l2;
-    if (isCheck2) { ws.getCell(`K${rS}`).value = check(rec[k2]); ws.getCell(`K${rS}`).alignment = { horizontal: 'center' }; }
-    else { ws.getCell(`K${rS}`).value = rec[k2] || ''; }
+    if (isCheck2) { ws.getCell(`K${rS}`).value = check(rec && rec[k2]); ws.getCell(`K${rS}`).alignment = { horizontal: 'center' }; }
+    else { ws.getCell(`K${rS}`).value = (rec && rec[k2]) || ''; }
     rS++;
   });
   setBorder(rS - siembraRows.length, 2, rS - 1, 11);
 
-  // ==============================
   // Diluyentes
-  // ==============================
   let rD = rS + 1;
   ws.mergeCells(`B${rD}:K${rD}`); ws.getCell(`B${rD}`).value = 'Diluyentes'; ws.getCell(`B${rD}`).alignment = { horizontal: 'center' }; ws.getCell(`B${rD}`).font = { bold: true };
   rD++;
@@ -353,11 +315,11 @@ exports.addPrettySheetForSample = async (wb, sample_id, rec) => {
   ];
   dilRows.forEach(row => {
     const [l1, k1, l2, k2] = row;
-    ws.mergeCells(`B${rD}:D${rD}`); ws.getCell(`B${rD}`).value = l1; ws.mergeCells(`E${rD}:G${rD}`); ws.getCell(`E${rD}`).value = rec[k1] || '';
+    ws.mergeCells(`B${rD}:D${rD}`); ws.getCell(`B${rD}`).value = l1; ws.mergeCells(`E${rD}:G${rD}`); ws.getCell(`E${rD}`).value = (rec && rec[k1]) || '';
     if (l2) {
-      ws.mergeCells(`H${rD}:J${rD}`); ws.getCell(`H${rD}`).value = l2; ws.getCell(`K${rD}`).value = rec[k2] || '';
+      ws.mergeCells(`H${rD}:J${rD}`); ws.getCell(`H${rD}`).value = l2; ws.getCell(`K${rD}`).value = (rec && rec[k2]) || '';
     } else {
-      ws.mergeCells(`H${rD}:K${rD}`); ws.getCell(`H${rD}`).value = rec[k1] || '';
+      ws.mergeCells(`H${rD}:K${rD}`); ws.getCell(`H${rD}`).value = (rec && rec[k1]) || '';
     }
     rD++;
   });
@@ -373,49 +335,13 @@ exports.addPrettySheetForSample = async (wb, sample_id, rec) => {
   return ws;
 };
 
-// Reusable helper: add a simple TPA sheet for a single sample into an existing workbook
-exports.addSheetForSample = async (wb, sample_id, rec) => {
-  if (!rec) {
-    rec = await tpaModel.getBySampleId(sample_id);
-  }
-  const ws = wb.addWorksheet('TPA');
-  const schema = [
-    { header: 'sample_id', key: 'sample_id', width: 16, group: 'Identificación' },
-    { header: 'Freezer 33-M', key: 'storage_freezer_33m', width: 14, group: 'Almacenamiento' },
-    { header: 'Refrigerador 33-M', key: 'storage_refrigerador_33m', width: 16, group: 'Almacenamiento' },
-    { header: 'Mesón siembra', key: 'storage_meson_siembra', width: 14, group: 'Almacenamiento' },
-    { header: 'Gabinete Traspaso', key: 'storage_gabinete_traspaso', width: 16, group: 'Almacenamiento' },
-    { header: 'Observaciones', key: 'observaciones', width: 30, group: 'Almacenamiento' },
-  ];
-  ws.columns = schema.map(c => ({ key: c.key, width: c.width || 12 }));
-  const totalCols = schema.length;
-  ws.mergeCells(1, 1, 1, totalCols);
-  const titleCell = ws.getCell(1, 1);
-  titleCell.value = `Formulario de Trazabilidad (TPA) - ${sample_id}`;
-  titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
-  titleCell.font = { bold: true, size: 14 };
-  const groups = {}; const order = [];
-  schema.forEach((c, i) => { const g = c.group || ''; if (!groups[g]) { groups[g] = { start: i+1, end: i+1 }; order.push(g);} else groups[g].end = i+1; });
-  order.forEach(g => { const { start, end } = groups[g]; ws.mergeCells(2, start, 2, end); const cell = ws.getCell(2, start); cell.value = g; cell.alignment = { horizontal:'center' }; cell.font = { bold:true }; });
-  ws.getRow(3).values = [, ...schema.map(c => c.header)]; ws.getRow(3).font = { bold: true };
-  const ordered = schema.map(c => {
-    const v = c.key === 'sample_id' ? sample_id : rec ? rec[c.key] : null;
-    const keysBool = ['storage_freezer_33m','storage_refrigerador_33m','storage_meson_siembra','storage_gabinete_traspaso'];
-    if (keysBool.includes(c.key)) return asCheck(v);
-    return v ?? '';
-  });
-  ws.addRow(ordered);
-  ws.views = [{ state: 'frozen', xSplit: 1, ySplit: 3 }];
-  return ws;
-};
-
 exports.exportExcel = async (req, res, next) => {
   try {
     const rows = await tpaModel.listAll();
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet('TPA');
 
-    // Define schema with groups and optional subgroups to mirror on-page sections
+    // Define el esquema de columnas con grupos y subgrupos
     const schema = [
       { header: 'sample_id', key: 'sample_id', width: 16, group: 'Identificación' },
 
@@ -531,13 +457,12 @@ exports.exportExcel = async (req, res, next) => {
       { header: 'Diluyente otro', key: 'diluyente_otro', width: 16, group: 'Diluyentes' },
       { header: 'Diluyentes otros', key: 'diluyente_otros1', width: 16, group: 'Diluyentes' },
 
-      // (Legacy Form B columns removed in new schema)
     ];
 
-    // Setup worksheet columns
+    // Configuracion de columnas
     ws.columns = schema.map(c => ({ key: c.key, width: c.width || 12 }));
 
-    // Top title row
+    // Titulo principal (fila 1, combinada)
     const totalCols = schema.length;
     ws.mergeCells(1, 1, 1, totalCols);
     const titleCell = ws.getCell(1, 1);
@@ -546,7 +471,7 @@ exports.exportExcel = async (req, res, next) => {
     titleCell.font = { bold: true, size: 14 };
     titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8F0FE' } };
 
-    // Row 2: Group headings (merged)
+    // Fila 2: Encabezados de grupo (combinados donde aplique)
     const groups = [];
     const groupOrder = [];
     schema.forEach((c, idx) => {
@@ -562,12 +487,12 @@ exports.exportExcel = async (req, res, next) => {
       cell.alignment = { horizontal: 'center', vertical: 'middle' };
       cell.font = { bold: true };
       cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF3F6FA' } };
-      // Draw a thick left border at group boundaries for header rows
+      // Dibuja bordes gruesos en los límites de los grupos
       ws.getCell(2, start).border = { left: { style: 'thick', color: { argb: 'FF9EB5D5' } } };
     });
 
-    // Row 3: Subgroup headings (merged where applicable)
-    // Build subgroup ranges within each group
+    // Fila 3: Encabezados de subgrupo (combinados donde aplique)
+    // Construye rangos de subgrupos
     const subgroupRanges = {};
     schema.forEach((c, idx) => {
       if (c.subgroup) {
@@ -576,7 +501,7 @@ exports.exportExcel = async (req, res, next) => {
         else subgroupRanges[key].end = idx + 1;
       }
     });
-    // Initialize row 3 with empty cells
+    // Inicializa fila 3 con celdas vacías
     for (let i = 1; i <= totalCols; i++) ws.getCell(3, i).value = '';
     Object.values(subgroupRanges).forEach(r => {
       ws.mergeCells(3, r.start, 3, r.end);
@@ -587,12 +512,12 @@ exports.exportExcel = async (req, res, next) => {
       cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEFF5FB' } };
     });
 
-    // Row 4: Column headers
+    // Fila 4: Encabezados de columna individuales
     ws.getRow(4).values = [, ...schema.map(c => c.header)];
     ws.getRow(4).font = { bold: true };
     ws.getRow(4).alignment = { horizontal: 'center' };
 
-    // Thin borders around header area
+    // Bordes finos alrededor de encabezados (filas 1-4)
     [1, 2, 3, 4].forEach(rn => {
       const row = ws.getRow(rn);
       for (let i = 1; i <= totalCols; i++) {
@@ -603,12 +528,12 @@ exports.exportExcel = async (req, res, next) => {
       }
     });
 
-    // Data rows start at row 5
+    // Las filas de datos comienzan en la fila 5
     rows.forEach(r => {
-      // Ordered using schema; coerce booleans/0-1 to checkmarks for appropriate columns
+      // Ordenado usando el esquema; forzar booleanos/0-1 a marcas de verificación para columnas apropiadas
       const ordered = schema.map(c => {
         const v = r[c.key];
-        // Heuristic: treat numeric 0/1 and booleans as checkbox values for typical boolean keys
+        // Heurística: tratar 0/1 numéricos y booleanos como valores de casilla de verificación para claves booleanas típicas
         const isBoolishKey = (
           c.key.startsWith('storage_') || c.key.startsWith('retiro_') || c.key.startsWith('pesado_') ||
           c.key.startsWith('equipo_') || c.key.startsWith('micropipeta_') || c.key.startsWith('limpieza_') ||
@@ -623,10 +548,10 @@ exports.exportExcel = async (req, res, next) => {
       newRow.alignment = { vertical: 'middle' };
     });
 
-    // Freeze panes (keep sample_id and headers visible)
+    // Inmovilizar filas de encabezado
     ws.views = [{ state: 'frozen', xSplit: 1, ySplit: 4 }];
 
-    // Optional: zebra stripes for data rows
+    // Opcional: bandas de cebra para filas de datos
     const firstDataRow = 5;
     for (let r = firstDataRow; r <= ws.rowCount; r++) {
       if ((r - firstDataRow) % 2 === 0) {
@@ -636,11 +561,11 @@ exports.exportExcel = async (req, res, next) => {
       }
     }
 
-    // Set borders at group boundaries for column header row to visually separate sections
+    // Setea bordes gruesos de grupo en fila de encabezados (fila 4)
     groupOrder.forEach(g => {
       const start = groups[g].start;
       const end = groups[g].end;
-      // Thick left border at start, thick right border at end for row 4 (column headers)
+      // Bordes gruesos en los límites de grupo para la fila 4 (encabezados de columna)
       ws.getCell(4, start).border = {
         left: { style: 'thick', color: { argb: 'FF9EB5D5' } },
         top: { style: 'thin', color: { argb: 'FFBFCAD9' } },
@@ -662,6 +587,7 @@ exports.exportExcel = async (req, res, next) => {
   }
 };
 
+// Añade la hoja TPA
 exports.exportTPAForm = async (req, res, next) => {
   try {
     const sample_id = req.query.sample_id;
@@ -670,80 +596,8 @@ exports.exportTPAForm = async (req, res, next) => {
     if (!rec) return res.status(404).send('Muestra no encontrada');
 
     const wb = new ExcelJS.Workbook();
-    // Add main pretty sheet using helper
-    await exports.addPrettySheetForSample(wb, sample_id, rec);
-
-    // ==============================
-    // Pestañas adicionales: ram, RM y L, CT, CF y E.coli, sal, Entero, saureus
-    // ==============================
-    const extraTabs = ['ram', 'RM y L', 'CT, CF y E.coli', 'sal', 'Entero', 'saureus'];
-    const headerMap = {
-      'ram': {
-        title: 'TRAZABILIDAD ANÁLISIS: ENUMERACIÓN DE AEROBIOS MESÓFILOS (NCh 2659.Of 2002)',
-        code: 'R-PR-SVVM-M-4-11 / 15-02-23',
-      },
-      'default': {
-        title: 'TRAZABILIDAD Y ANÁLISIS',
-        code: 'R-INS-MM-M-1-15 /23-08-23',
-      }
-    };
-    const renderHeaderOnly = (sheet, name) => {
-      const conf = headerMap[name] || headerMap.default;
-      // Título
-      sheet.mergeCells('B1:T1');
-      sheet.getCell('B1').value = conf.title;
-      sheet.getCell('B1').alignment = { horizontal: 'center' };
-      sheet.getCell('B1').font = { bold: true, size: 18 };
-      // Código
-      sheet.mergeCells('B2:T2');
-      sheet.getCell('B2').value = conf.code;
-      sheet.getCell('B2').alignment = { horizontal: 'center' };
-      sheet.getCell('B2').font = { bold: true, size: 12 };
-      // Banda ID
-      sheet.mergeCells('I3:K3');
-      const idCell2 = sheet.getCell('I3');
-      idCell2.value = `${sample_id}`;
-      idCell2.alignment = { horizontal: 'center', vertical: 'middle' };
-      idCell2.font = { bold: true, size: 14 };
-      idCell2.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' } };
-      sheet.getRow(3).height = 24;
-      // Borde ID
-      for (let c = 9; c <= 11; c++) {
-        const cell = sheet.getCell(3, c);
-        cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
-      }
-      // Etiqueta ALI en H3
-      const ali2 = sheet.getCell('H3');
-      ali2.value = 'ALI';
-      ali2.alignment = { horizontal: 'center', vertical: 'middle' };
-      ali2.font = { bold: true };
-      ali2.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
-    };
-    // Cargar datos RAM para este sample (si existen)
-    const ramModel = require('../models/formRAM');
-    const ram = await ramModel.getBySampleId(sample_id);
-
-    extraTabs.forEach(name => {
-      const s = wb.addWorksheet(name);
-      renderHeaderOnly(s, name);
-      if (name === 'ram') {
-        // Cabeceras simples
-        s.getColumn(2).width = 28; s.getColumn(3).width = 90;
-        s.getCell('B5').value = 'Notas'; s.getCell('B5').font = { bold: true };
-        s.mergeCells('C5:T7');
-        s.getCell('C5').value = (ram && ram.notes) || '';
-        s.getCell('C5').alignment = { vertical: 'top', wrapText: true };
-        // Observaciones
-        s.getCell('B8').value = 'Observaciones'; s.getCell('B8').font = { bold: true };
-        s.mergeCells('C8:T11');
-        s.getCell('C8').value = (ram && ram.observaciones) || '';
-        s.getCell('C8').alignment = { vertical: 'top', wrapText: true };
-      } else {
-        s.getCell('B5').value = 'Sección en desarrollo';
-        s.getCell('B5').font = { italic: true, color: { argb: 'FF808080' } };
-      }
-    });
-
+  
+  await exports.addSheetForSample(wb, sample_id, rec);
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename="TPA_${sample_id}.xlsx"`);
     await wb.xlsx.write(res);
