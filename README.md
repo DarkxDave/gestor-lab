@@ -1,3 +1,5 @@
+# David Rojas INF4541 paralelo 4
+
 # Gestor Lab
 
 Aplicación web (Node.js + Express + EJS) para gestionar IDs de muestras con múltiples formularios, MySQL (phpMyAdmin) y exportación a Excel.
