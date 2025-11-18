@@ -19,6 +19,31 @@ exports.addSheetForSample = async (wb, sample_id, data) => {
     }
   };
   const check = (v) => (v === true || v === 1 || v === '1') ? '√' : '';
+  const dstr = (v) => {
+    if (!v) return '';
+    if (v instanceof Date) {
+      const tz = v.getTimezoneOffset();
+      const local = new Date(v.getTime() - tz*60000);
+      return local.toISOString().slice(0,10);
+    }
+    const s = String(v);
+    const m = s.match(/^\d{4}-\d{2}-\d{2}/);
+    if (m) return m[0];
+    if (s.includes('T')) return s.slice(0,10);
+    if (s.includes(' ')) return s.split(' ')[0];
+    return s;
+  };
+  const tstr = (v) => {
+    if (!v) return '';
+    const s = String(v);
+    if (/^\d{2}:\d{2}/.test(s)) return s.slice(0,5);
+    if (v instanceof Date) {
+      const hh = String(v.getHours()).padStart(2,'0');
+      const mm = String(v.getMinutes()).padStart(2,'0');
+      return `${hh}:${mm}`;
+    }
+    return s;
+  };
   const yesNoMark = (val, want) => (val === null || val === undefined) ? '' : (String(val) === String(want) ? '√' : '');
   const splitPair = (val) => {
     const s = (val == null) ? '' : String(val);
@@ -74,12 +99,12 @@ exports.addSheetForSample = async (wb, sample_id, data) => {
   ws.mergeCells('B6:G6'); ws.getCell('B6').value = 'Inicio Incubación (Día/Mes/Hora/Analista):'; ws.getCell('B6').font = { bold: true };
   ws.mergeCells('H6:K6'); ws.getCell('H6').value = 'Término Análisis (Día/Mes/Hora/Analista):'; ws.getCell('H6').font = { bold: true };
   // Left (inicio)
-  ws.getCell('B7').value = 'Fecha'; ws.mergeCells('C7:D7'); ws.getCell('C7').value = data.inicio_incubacion_fecha || '';
-  ws.getCell('B8').value = 'Hora'; ws.mergeCells('C8:D8'); ws.getCell('C8').value = data.inicio_incubacion_hora || '';
+  ws.getCell('B7').value = 'Fecha'; ws.mergeCells('C7:D7'); ws.getCell('C7').value = dstr(data.inicio_incubacion_fecha);
+  ws.getCell('B8').value = 'Hora'; ws.mergeCells('C8:D8'); ws.getCell('C8').value = tstr(data.inicio_incubacion_hora);
   ws.getCell('B9').value = 'Analista'; ws.mergeCells('C9:G9'); ws.getCell('C9').value = data.inicio_incubacion_analista || '';
   // Right (termino)
-  ws.getCell('H7').value = 'Fecha'; ws.mergeCells('I7:J7'); ws.getCell('I7').value = data.termino_analisis_fecha || '';
-  ws.getCell('H8').value = 'Hora'; ws.mergeCells('I8:J8'); ws.getCell('I8').value = data.termino_analisis_hora || '';
+  ws.getCell('H7').value = 'Fecha'; ws.mergeCells('I7:J7'); ws.getCell('I7').value = dstr(data.termino_analisis_fecha);
+  ws.getCell('H8').value = 'Hora'; ws.mergeCells('I8:J8'); ws.getCell('I8').value = tstr(data.termino_analisis_hora);
   ws.getCell('H9').value = 'Analista'; ws.mergeCells('I9:K9'); ws.getCell('I9').value = data.termino_analisis_analista || '';
   setBorder(6, 2, 9, 11);
   // Limpiar bordes específicos: E7, F7, G7, K7 y E8, F8, G8, K8
@@ -92,8 +117,8 @@ exports.addSheetForSample = async (wb, sample_id, data) => {
   ws.getCell('D12').value = 'UFC:'; ws.getCell('E12').value = data.cc2_pesado_ufc || '';
   ws.getCell('F12').value = 'Control ambiental Siembra:'; ws.mergeCells('G12:K12'); ws.getCell('G12').value = data.cc2_siembra || '';
   // Fila 2
-  ws.getCell('B13').value = 'Hora inicio:'; ws.getCell('C13').value = data.cc2_hora_inicio || '';
-  ws.getCell('D13').value = 'Hora término:'; ws.getCell('E13').value = data.cc2_hora_termino || '';
+  ws.getCell('B13').value = 'Hora inicio:'; ws.getCell('C13').value = tstr(data.cc2_hora_inicio);
+  ws.getCell('D13').value = 'Hora término:'; ws.getCell('E13').value = tstr(data.cc2_hora_termino);
   ws.getCell('F13').value = 'T°:'; ws.getCell('G13').value = data.cc2_temp || '';
   // Fila 3
   ws.getCell('B14').value = 'Control de siembra E. Coli (UFC):'; ws.mergeCells('C14:D14'); ws.getCell('C14').value = data.cc2_ecoli_ufc || '';
@@ -114,7 +139,7 @@ exports.addSheetForSample = async (wb, sample_id, data) => {
   ws.getCell('B22').value = 'Desfavorable:'; ws.getCell('C22').value = 'SI'; ws.getCell('D22').value = check(data.mic_desfavorable_si); ws.getCell('E22').value = 'NO'; ws.getCell('F22').value = check(data.mic_desfavorable_no);
   ws.getCell('B23').value = 'Tabla/Página:'; ws.mergeCells('C23:D23'); ws.getCell('C23').value = data.mic_tabla_pagina || '';
   ws.getCell('E23').value = 'Límite:'; ws.mergeCells('F23:K23'); ws.getCell('F23').value = data.mic_limite || '';
-  ws.getCell('B24').value = 'Fecha y hora de entrega:'; ws.getCell('C24').value = data.mic_fecha_entrega || ''; ws.getCell('D24').value = data.mic_hora_entrega || '';
+  ws.getCell('B24').value = 'Fecha y hora de entrega:'; ws.getCell('C24').value = dstr(data.mic_fecha_entrega); ws.getCell('D24').value = tstr(data.mic_hora_entrega);
   setBorder(22, 2, 24, 11);
 
   // Section: Datos (reemplazo con layout de ram_provisorio a partir de B27)
@@ -142,6 +167,25 @@ exports.addSheetForSample = async (wb, sample_id, data) => {
   // Filas de captura (5) y merge D..E
   for (let r = 33; r <= 37; r++) {
     ws.mergeCells(`D${r}:E${r}`);
+  }
+  // Poblar base de dilución y colonias desde datos guardados
+  const setCell = (addr, val, numeric = true) => {
+    if (val === undefined || val === null || val === '') { ws.getCell(addr).value = ''; return; }
+    if (!numeric) { ws.getCell(addr).value = String(val); return; }
+    const n = toNumber(val);
+    ws.getCell(addr).value = (n === null) ? String(val) : n;
+  };
+  // Dilución inicial fija (exponente log10) en B33 y derivadas: -1, -2, -3, -4, -5
+  ws.getCell('B33').value = -1;
+  // Colonias por fila (1..5)
+  for (let i = 1; i <= 5; i++) {
+    const r = 32 + i; // 33..37
+    setCell(`C${r}`, data[`datos_colonias_num_a_${i}`]);
+    setCell(`D${r}`, data[`datos_colonias_num_b_${i}`]);
+    setCell(`F${r}`, data[`datos_colonias_por_conf_a_${i}`]);
+    setCell(`G${r}`, data[`datos_colonias_por_conf_b_${i}`]);
+    setCell(`H${r}`, data[`datos_colonias_conf_a_${i}`]);
+    setCell(`I${r}`, data[`datos_colonias_conf_b_${i}`]);
   }
   // Reglas de dilución en columna B (B33 entrada; B34..B37 derivadas)
   ws.getCell('B34').value = { formula: 'IF(B33="","",B33-1)' };
@@ -256,14 +300,15 @@ exports.addSheetForSample = async (wb, sample_id, data) => {
   // Q helpers
   ws.getCell('Q25').value = { formula: 'IF(OR(F27="",F28="",B33=""),"NO","YES")' };
   ws.getCell('Q26').value = { formula: 'IF(AND(C33="",D33="",C34="",D34=""),"NO","YES")' };
-  ws.getCell('Q27').value = { formula: 'IF(AND(J33="",K33="",J34="",K34=""),"NO","YES")' };
+  ws.getCell('Q27').value = { formula: 'IF(OR(AND(J33="",K33="",J34="",K34=""),OR(J33="ERROR",K33="ERROR",J34="ERROR",K34="ERROR")),"NO","YES")' };
   ws.getCell('Q30').value = { formula: 'MIN(C33:E33)' };
   ws.getCell('Q31').value = { formula: 'MAX(C33:E33)' };
   ws.getCell('Q32').value = { formula: '2*(Q30*LN(IF(Q30=0,1,Q30)/AVERAGE(Q30:Q31))+Q31*LN(Q31/AVERAGE(Q30:Q31)))' };
-  ws.getCell('Q33').value = { formula: '1-CHISQ.DIST(Q32,1,TRUE)' };
+  ws.getCell('Q33').value = { formula: 'CHIDIST(Q32,1)' };
   ws.getCell('Q37').value = { formula: 'IF(T27="N/A","",SUM(J33:K37))' };
   ws.getCell('Q38').value = { formula: 'IF(Q26="NO","",IF(MID(C33,1,1)=">",MID(C33,2,4),IF(Q37="",SUM(C33:E37),Q37)))' };
-  ws.getCell('Q39').value = { formula: 'IF(F27=1,10^(B33),(1/F27)*(10^(B33+1)))' };
+  // Factor de dilución base (solo suspensión inicial 1/F27). Las diluciones adicionales ya se ponderan en Q42.
+  ws.getCell('Q39').value = { formula: 'IF(F27="",1,1/F27)' };
   ws.getCell('Q40').value = { formula: 'IF(Q27="NO",COUNTA(C33:E33),COUNTA(F33:G33))' };
   ws.getCell('Q41').value = { formula: 'IF(Q27="NO",COUNTA(C34:E34),COUNTA(F34:G34))' };
   // Placas contadas por dilución 3..5 y volumen ponderado extendido
@@ -280,12 +325,12 @@ exports.addSheetForSample = async (wb, sample_id, data) => {
   ws.getCell('T30').value = { formula: 'MIN(C34:E34)' };
   ws.getCell('T31').value = { formula: 'MAX(C34:E34)' };
   ws.getCell('T32').value = { formula: '2*(T30*LN(IF(T30=0,1,T30)/AVERAGE(T30:T31))+T31*LN(T31/AVERAGE(T30:T31)))' };
-  ws.getCell('T33').value = { formula: '1-CHISQ.DIST(T32,1,TRUE)' };
+  ws.getCell('T33').value = { formula: 'CHIDIST(T32,1)' };
   // W helpers
   ws.getCell('W30').value = { formula: 'SUM(C33:E33)' };
   ws.getCell('W31').value = { formula: 'SUM(C34:E34)' };
   ws.getCell('W32').value = { formula: '2*(W30*LN(IF(W30=0,1,W30)/(10*(W30+W31)/11))+W31*LN(IF(W31=0,1,W31)/(1*(W30+W31)/11)))' };
-  ws.getCell('W33').value = { formula: '1-CHISQ.DIST(W32,1,TRUE)' };
+  ws.getCell('W33').value = { formula: 'CHIDIST(W32,1)' };
   // X helpers
   ws.getCell('X24').value = { formula: 'X26*1' };
   ws.getCell('X25').value = { formula: 'ROUND(X26,0)' };
@@ -302,7 +347,7 @@ exports.addSheetForSample = async (wb, sample_id, data) => {
   ws.getCell('T38').value = { formula: 'MIN(C35:E35)' };
   ws.getCell('T39').value = { formula: 'MAX(C35:E35)' };
   ws.getCell('T40').value = { formula: '2*(T38*LN(IF(T38=0,1,T38)/AVERAGE(T38:T39))+T39*LN(T39/AVERAGE(T38:T39)))' };
-  ws.getCell('T41').value = { formula: '1-CHISQ.DIST(T40,1,TRUE)' };
+  ws.getCell('T41').value = { formula: 'CHIDIST(T40,1)' };
 
   // 4ta dilución (fila de datos 36)
   ws.getCell('S42').value = '4ta dilusion';
@@ -314,7 +359,7 @@ exports.addSheetForSample = async (wb, sample_id, data) => {
   ws.getCell('T43').value = { formula: 'MIN(C36:E36)' };
   ws.getCell('T44').value = { formula: 'MAX(C36:E36)' };
   ws.getCell('T45').value = { formula: '2*(T43*LN(IF(T43=0,1,T43)/AVERAGE(T43:T44))+T44*LN(T44/AVERAGE(T43:T44)))' };
-  ws.getCell('T46').value = { formula: '1-CHISQ.DIST(T45,1,TRUE)' };
+  ws.getCell('T46').value = { formula: 'CHIDIST(T45,1)' };
 
   // 5ta dilución (fila de datos 37)
   ws.getCell('S47').value = '5ta dilusion';
@@ -326,7 +371,7 @@ exports.addSheetForSample = async (wb, sample_id, data) => {
   ws.getCell('T48').value = { formula: 'MIN(C37:E37)' };
   ws.getCell('T49').value = { formula: 'MAX(C37:E37)' };
   ws.getCell('T50').value = { formula: '2*(T48*LN(IF(T48=0,1,T48)/AVERAGE(T48:T49))+T49*LN(T49/AVERAGE(T48:T49)))' };
-  ws.getCell('T51').value = { formula: '1-CHISQ.DIST(T50,1,TRUE)' };
+  ws.getCell('T51').value = { formula: 'CHIDIST(T50,1)' };
 
   // Aceptación para 3ra–5ta dilución en RAM
   ws.getCell('R37').value = 'OK 3ra'; ws.getCell('R37').font = { bold: true };

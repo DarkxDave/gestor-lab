@@ -1,4 +1,33 @@
 <% layout('partials/layout') %>
+<% 
+  const fmtDate = (v) => {
+    if (!v) return '';
+    try {
+      if (v instanceof Date) {
+        const tz = v.getTimezoneOffset();
+        const local = new Date(v.getTime() - tz*60000);
+        return local.toISOString().slice(0,10);
+      }
+      const s = String(v);
+      const m = s.match(/^\d{4}-\d{2}-\d{2}/);
+      if (m) return m[0];
+      if (s.includes('T')) return s.slice(0,10);
+      if (s.includes(' ')) return s.split(' ')[0];
+      return s.slice(0,10);
+    } catch(_) { return ''; }
+  };
+  const fmtTime = (v) => {
+    if (!v) return '';
+    if (v instanceof Date) {
+      const hh = String(v.getHours()).padStart(2,'0');
+      const mm = String(v.getMinutes()).padStart(2,'0');
+      return `${hh}:${mm}`;
+    }
+    const s = String(v);
+    if (/^\d{2}:\d{2}/.test(s)) return s.slice(0,5);
+    return '';
+  };
+%>
 <h2>RAM: Enumeración de Aerobios Mesófilos</h2>
 <form method="get" action="/form-ram" class="row g-2 mb-3">
   <div class="col-auto">
@@ -56,11 +85,11 @@
               <div class="row g-2">
                 <div class="col-5 col-md-4">
                   <label class="form-label small mb-1">Fecha</label>
-                  <input type="date" name="inicio_incubacion_fecha" class="form-control" value="<%= (data && data.inicio_incubacion_fecha) || '' %>">
+                  <input type="date" name="inicio_incubacion_fecha" class="form-control" value="<%= fmtDate(data && data.inicio_incubacion_fecha) %>">
                 </div>
                 <div class="col-4 col-md-3">
                   <label class="form-label small mb-1">Hora</label>
-                  <input type="time" name="inicio_incubacion_hora" class="form-control" value="<%= (data && data.inicio_incubacion_hora) || '' %>">
+                  <input type="time" name="inicio_incubacion_hora" class="form-control" value="<%= fmtTime(data && data.inicio_incubacion_hora) %>">
                 </div>
                 <div class="col-12 col-md-5">
                   <label class="form-label small mb-1">Analista</label>
@@ -75,11 +104,11 @@
               <div class="row g-2">
                 <div class="col-5 col-md-4">
                   <label class="form-label small mb-1">Fecha</label>
-                  <input type="date" name="termino_analisis_fecha" class="form-control" value="<%= (data && data.termino_analisis_fecha) || '' %>">
+                  <input type="date" name="termino_analisis_fecha" class="form-control" value="<%= fmtDate(data && data.termino_analisis_fecha) %>">
                 </div>
                 <div class="col-4 col-md-3">
                   <label class="form-label small mb-1">Hora</label>
-                  <input type="time" name="termino_analisis_hora" class="form-control" value="<%= (data && data.termino_analisis_hora) || '' %>">
+                  <input type="time" name="termino_analisis_hora" class="form-control" value="<%= fmtTime(data && data.termino_analisis_hora) %>">
                 </div>
                 <div class="col-12 col-md-5">
                   <label class="form-label small mb-1">Analista</label>
@@ -109,9 +138,9 @@
               </tr>
               <tr>
                 <td class="fw-semibold">Hora inicio:</td>
-                <td><input type="time" name="cc2_hora_inicio" class="form-control" value="<%= (data && data.cc2_hora_inicio) || '' %>"></td>
+                <td><input type="time" name="cc2_hora_inicio" class="form-control" value="<%= fmtTime(data && data.cc2_hora_inicio) %>"></td>
                 <td class="fw-semibold">Hora término:</td>
-                <td><input type="time" name="cc2_hora_termino" class="form-control" value="<%= (data && data.cc2_hora_termino) || '' %>"></td>
+                <td><input type="time" name="cc2_hora_termino" class="form-control" value="<%= fmtTime(data && data.cc2_hora_termino) %>"></td>
                 <td class="fw-semibold">T°:</td>
                 <td><input type="text" name="cc2_temp" class="form-control" value="<%= (data && data.cc2_temp) || '' %>"></td>
               </tr>
@@ -234,10 +263,10 @@
               <tr>
                 <td class="fw-semibold">Fecha y hora de entrega:</td>
                 <td style="width: 20%">
-                  <input type="date" name="mic_fecha_entrega" class="form-control" value="<%= (data && data.mic_fecha_entrega) || '' %>">
+                  <input type="date" name="mic_fecha_entrega" class="form-control" value="<%= fmtDate(data && data.mic_fecha_entrega) %>">
                 </td>
                 <td style="width: 20%">
-                  <input type="time" name="mic_hora_entrega" class="form-control" value="<%= (data && data.mic_hora_entrega) || '' %>">
+                  <input type="time" name="mic_hora_entrega" class="form-control" value="<%= fmtTime(data && data.mic_hora_entrega) %>">
                 </td>
                 <td></td>
               </tr>
@@ -261,7 +290,7 @@
             <input type="text" name="datos_volumen_petri_ml" class="form-control" style="font-weight:700" value="<%= (data && data.datos_volumen_petri_ml) || '' %>">
           </div>
           <div class="col-md-6">
-            <label class="form-label">Dilución (log10) fila 1</label>
+            <label class="form-label">Dilución</label>
             <input type="text" id="dil_exp1" name="datos_dilucion_log10_1" class="form-control" placeholder="Ej: -2 (para 10^-2)" value="<%= (data && data.datos_dilucion_log10_1) || '' %>">
             <div class="form-text">Las siguientes filas se calculan restando 1 por fila.</div>
           </div>
@@ -309,16 +338,14 @@
             <div class="border rounded p-3 h-100">
               <div class="fw-bold mb-1">Número de CFU/g o mL</div>
               <div id="res_cfu" class="form-control text-center fw-bold" style="background:#fffef0">—</div>
-              <div class="small text-muted mt-2">Formato: notación científica (1 cifra). Usa diluciones 1..5 según disponibilidad.</div>
+              <div class="small text-muted mt-2">Formato: notación científica.</div>
             </div>
           </div>
           <div class="col-md-6">
             <div class="border rounded p-3 h-100">
-              <div class="fw-bold mb-2">Aceptación por dilución (paralelo)</div>
+              <div class="fw-bold mb-2">Aceptación por dilución</div>
               <div class="d-flex flex-wrap gap-2" id="res_ok_badges">
-                <!-- badges dinámicos -->
               </div>
-              <div class="small text-muted mt-2">Criterio P&gt;0.01 (α=0.01), basado en chi-cuadrado (2 duplicados).</div>
             </div>
           </div>
         </div>
@@ -417,7 +444,7 @@
     function recalc(){
       const vol = parseNum($('input[name="datos_volumen_petri_ml"]').value);
       const den = parseNum($('input[name="datos_suspension_inicial_den"]').value);
-      const exp1 = parseNum($('#dil_exp1').value);
+      const exp1 = parseNum($('#dil_exp1').value); // ya no afecta el factor base
       // per fila
       const C = [null], D=[null], F=[null], G=[null], H=[null], I=[null], J=[null], K=[null];
       for(let i=1;i<=5;i++){
@@ -448,7 +475,7 @@
       }
 
       // Validaciones presencia
-      const q25 = (vol!=null && den!=null && exp1!=null);
+      const q25 = (vol!=null && den!=null);
       // q26: ¿hay datos primeros dos?
       const q26 = !!( (C[1]!=null||D[1]!=null||F[1]!=null||G[1]!=null) || (C[2]!=null||D[2]!=null||F[2]!=null||G[2]!=null) );
       const anyFinal12 = !!( (J[1]!==''&&J[1]!=='ERROR') || (K[1]!==''&&K[1]!=='ERROR') || (J[2]!==''&&J[2]!=='ERROR') || (K[2]!==''&&K[2]!=='ERROR') );
@@ -468,9 +495,9 @@
 
       // Q39 factor de dilución
       let q39 = null;
-      if (den!=null && exp1!=null){
-        if (den===1) q39 = Math.pow(10, exp1);
-        else q39 = (1/den) * Math.pow(10, exp1+1);
+      if (den!=null){
+        // Solo suspensión inicial: 1/den. Las diluciones adicionales se ponderan en q42.
+        q39 = (den === 0) ? null : (1/den);
       }
       // Q42 volumen ponderado
       const q42 = (vol!=null) ? vol * ( q40 + 0.1*q41 + 0.01*q45 + 0.001*q46 + 0.0001*q47 ) : null;
