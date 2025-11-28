@@ -32,13 +32,13 @@ exports.loadBySampleId = async (req, res, next) => {
   }
 };
 
-// Guardar en todas las pestañas: esta versión mínima asegura presencia del sample en todas las tablas
+// Guardar en todas las pestañas
 exports.saveAll = async (req, res, next) => {
   try {
     const { sample_id } = req.body;
     if (!sample_id) return res.status(400).json({ ok: false, error: 'sample_id requerido' });
     await samples.ensureSample(sample_id);
-    // Asegurar filas mínimas vía modelos (sin SQL directo en controlador)
+    // Asegurar filas mínimas vía modelos correspondientes
     const tpa = require('../models/tpaFormModel');
     const ram = require('../models/ramFormModel');
     const rmyl = require('../models/rmylFormModel');

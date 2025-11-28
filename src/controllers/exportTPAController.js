@@ -491,7 +491,7 @@ exports.exportExcel = async (req, res, next) => {
       ws.getCell(2, start).border = { left: { style: 'thick', color: { argb: 'FF9EB5D5' } } };
     });
 
-    // Fila 3: Encabezados de subgrupo (combinados donde aplique)
+    // Fila 3: Encabezados de subgrupo
     // Construye rangos de subgrupos
     const subgroupRanges = {};
     schema.forEach((c, idx) => {

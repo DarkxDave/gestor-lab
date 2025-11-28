@@ -1,7 +1,7 @@
 const { query } = require('../db');
 const samples = require('./sampleModel');
 
-// Columns present in form_ram_entries corresponding to form field names
+// Columnas presente en el formulario RAM
 const columns = [
   // Fechas y análisis
   'inicio_incubacion_fecha',

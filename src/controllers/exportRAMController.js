@@ -86,7 +86,6 @@ exports.addSheetForSample = async (wb, sample_id, data) => {
   for (let c = 1; c <= 26; c++) ws.getColumn(c).width = 14;
 
   // Sección: Fechas y análisis
-  // Achicar L, M, N, O
   ws.getColumn(12).width = 4; // L
   ws.getColumn(13).width = 4; // M
   ws.getColumn(14).width = 4; // N
@@ -107,7 +106,7 @@ exports.addSheetForSample = async (wb, sample_id, data) => {
   ws.getCell('H8').value = 'Hora'; ws.mergeCells('I8:J8'); ws.getCell('I8').value = tstr(data.termino_analisis_hora);
   ws.getCell('H9').value = 'Analista'; ws.mergeCells('I9:K9'); ws.getCell('I9').value = data.termino_analisis_analista || '';
   setBorder(6, 2, 9, 11);
-  // Limpiar bordes específicos: E7, F7, G7, K7 y E8, F8, G8, K8
+  // Limpiar bordes extras en E7,G7,E8,G8
   ['E7','F7','G7','K7','E8','F8','G8','K8'].forEach(addr => { ws.getCell(addr).border = undefined; });
 
   // Sección: Set de Análisis
@@ -248,7 +247,7 @@ exports.addSheetForSample = async (wb, sample_id, data) => {
   ws.getColumn(26).width = 18; // Z
 
   // Rótulos auxiliares en columnas P, S y V (desplazados para iniciar en fila 25)
-  // Columna P (equivalentes a P2..P21 en provisorio → P25..P44 en RAM)
+  // Columna P (P2..P10 → P25..P44)
   ws.getCell('P25').value = 'Dilución de la suspensión o volumen dado';
   ws.getCell('P26').value = 'Número de colonias dado';
   ws.getCell('P27').value = 'Número de colonias confirmadas';

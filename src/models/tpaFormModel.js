@@ -58,7 +58,7 @@ exports.getBySampleId = async (sample_id) => {
   return rows[0];
 };
 
-// List for export summary: join samples with TPA
+// Lista para exportar todos los registros con su sample_id
 exports.listAll = async () => {
   return await query(`
     SELECT s.sample_id,

@@ -11,7 +11,6 @@ router.get('/', (req, res, next) => {
 
 router.post('/save', ctrl.save);
 
-// Endpoint para "Guardar en todas": asegura filas en todas las tablas por sample_id
 router.post('/save-all', ctrl.saveAll);
 
 module.exports = router;
