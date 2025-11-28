@@ -15,3 +15,12 @@ exports.getBySampleId = async (sample_id) => {
   const rows = await query('SELECT * FROM form_rmyl_entries WHERE sample_id=?', [sample_id]);
   return rows[0] || null;
 };
+
+exports.ensureRow = async (sample_id) => {
+  await query(
+    `INSERT INTO form_rmyl_entries (sample_id, created_at, updated_at)
+     VALUES (?, NOW(), NOW())
+     ON DUPLICATE KEY UPDATE updated_at=NOW()`,
+    [sample_id]
+  );
+};

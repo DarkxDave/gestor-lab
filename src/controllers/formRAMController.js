@@ -38,20 +38,23 @@ exports.saveAll = async (req, res, next) => {
     const { sample_id } = req.body;
     if (!sample_id) return res.status(400).json({ ok: false, error: 'sample_id requerido' });
     await samples.ensureSample(sample_id);
-    // Upserts mínimos en todas las tablas conocidas (solo aseguran fila)
-    const upserts = [
-      `INSERT INTO form_tpa_entries (sample_id, created_at, updated_at) VALUES (?, NOW(), NOW()) ON DUPLICATE KEY UPDATE updated_at=NOW()` ,
-      `INSERT INTO form_ram_entries (sample_id, created_at, updated_at) VALUES (?, NOW(), NOW()) ON DUPLICATE KEY UPDATE updated_at=NOW()` ,
-      `INSERT INTO form_rmyl_entries (sample_id, created_at, updated_at) VALUES (?, NOW(), NOW()) ON DUPLICATE KEY UPDATE updated_at=NOW()` ,
-      `INSERT INTO form_ctcfe_entries (sample_id, created_at, updated_at) VALUES (?, NOW(), NOW()) ON DUPLICATE KEY UPDATE updated_at=NOW()` ,
-      `INSERT INTO form_sal_entries (sample_id, created_at, updated_at) VALUES (?, NOW(), NOW()) ON DUPLICATE KEY UPDATE updated_at=NOW()` ,
-      `INSERT INTO form_entero_entries (sample_id, created_at, updated_at) VALUES (?, NOW(), NOW()) ON DUPLICATE KEY UPDATE updated_at=NOW()` ,
-      `INSERT INTO form_saureus_entries (sample_id, created_at, updated_at) VALUES (?, NOW(), NOW()) ON DUPLICATE KEY UPDATE updated_at=NOW()` ,
-    ];
-    const { query } = require('../db');
-    for (const sql of upserts) {
-      await query(sql, [sample_id]);
-    }
+    // Asegurar filas mínimas vía modelos (sin SQL directo en controlador)
+    const tpa = require('../models/tpaFormModel');
+    const ram = require('../models/ramFormModel');
+    const rmyl = require('../models/rmylFormModel');
+    const ctcfe = require('../models/ctcfeFormModel');
+    const sal = require('../models/salFormModel');
+    const entero = require('../models/enteroFormModel');
+    const saureus = require('../models/saureusFormModel');
+    await Promise.all([
+      tpa.ensureRow(sample_id),
+      ram.ensureRow(sample_id),
+      rmyl.ensureRow(sample_id),
+      ctcfe.ensureRow(sample_id),
+      sal.ensureRow(sample_id),
+      entero.ensureRow(sample_id),
+      saureus.ensureRow(sample_id),
+    ]);
     res.json({ ok: true });
   } catch (err) {
     next(err);

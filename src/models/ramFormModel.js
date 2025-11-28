@@ -135,3 +135,13 @@ exports.listAll = async () => {
     ORDER BY s.id DESC
   `);
 };
+
+// Asegura existencia de fila mínima
+exports.ensureRow = async (sample_id) => {
+  await query(
+    `INSERT INTO form_ram_entries (sample_id, created_at, updated_at)
+     VALUES (?, NOW(), NOW())
+     ON DUPLICATE KEY UPDATE updated_at=NOW()`,
+    [sample_id]
+  );
+};

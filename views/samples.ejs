@@ -12,19 +12,16 @@
 <table class="table table-striped">
   <thead>
     <tr>
-      <th>ID</th>
       <th>sample_id</th>
-      <th>Acciones</th>
+      <th>TPA</th>
     </tr>
   </thead>
   <tbody>
     <% (samples || []).forEach(s => { %>
       <tr>
-        <td><%= s.id %></td>
-        <td><%= s.sample_id %></td>
+        <td class="fw-semibold"><%= s.sample_id %></td>
         <td>
           <a class="btn btn-sm btn-secondary" href="/form-tpa?sample_id=<%= s.sample_id %>">TPA</a>
-          <a class="btn btn-sm btn-secondary" href="/form-b/load?sample_id=<%= s.sample_id %>">Form B</a>
         </td>
       </tr>
     <% }) %>
