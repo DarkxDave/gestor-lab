@@ -1,12 +1,26 @@
-# David Rojas INF4541 paralelo 4
-
 # Gestor Lab
 
 Aplicación web (Node.js + Express + EJS) para gestionar IDs de muestras con múltiples formularios, MySQL (phpMyAdmin) y exportación a Excel.
 
+## Tecnologías utilizadas
+
+### Frontend
+- Angular
+- Ionic Framework
+- TypeScript
+- HTML5
+- CSS
+
+### Backend
+- Node.js
+- ExcelJS
+
 ## Requisitos
-- Windows con XAMPP (MySQL en `localhost:3306`)
+- Windows
+- XAMPP (MySQL en `localhost:3306`)
 - Node.js 18+
+- Angular CLI
+- Ionic CLI
 
 ## Instalación
 1. Clonar o abrir este proyecto en `c:\xampp\htdocs\gestor-lab`.
@@ -29,7 +43,7 @@ mysql -h localhost -P 3306 -u root -p < .\scripts\init_db.sql
 ```
 
 ### Sin migraciones incrementales
-Este proyecto se instala limpio con un único script baseline (`init_db.sql`). Se eliminaron los SQL de `scripts/migrations/` para evitar confusión. Si realiza cambios al esquema, actualice el baseline y commitee.
+Este proyecto se instala limpio con un único script baseline (`init_db.sql`). 
 
 ## Ejecutar en desarrollo
 ```powershell
@@ -38,6 +52,13 @@ npm run dev
 
 Abrir: http://localhost:3000
 
+### Ejecutar el frontend (Angular + Ionic)
+Ejecutar el frontend (Angular + Ionic)
+cd frontend
+ionic serve
+
+
+
 ## Uso rápido
 - Inicio: navegación a Formularios y Muestras.
 - Formulario A y B: Ingrese `sample_id`, complete campos (textos y checkboxes) y "Guardar".
@@ -45,14 +66,21 @@ Abrir: http://localhost:3000
 - Exportar: `Exportar Excel` genera `muestras.xlsx` con datos A+B.
 
 ## Estructura
-- `src/app.js`: servidor Express
-- `src/db.js`: conexión MySQL (mysql2/promise)
-- `src/routes/*`: rutas
-- `src/controllers/*`: controladores
-- `src/models/*`: consultas SQL
-- `views/*`: EJS con Bootstrap
-- `public/*`: estáticos
-- `scripts/init_db.sql`: esquema MySQL
+Estructura del proyecto
+### Backend
+
+- src/app.js: servidor Express
+- src/db.js: conexión a MySQL
+- src/routes/: definición de rutas
+- src/controllers/: lógica de negocio
+- src/models/: consultas SQL
+- scripts/init_db.sql: esquema de base de datos
+
+### Frontend
+- frontend/src/app/: componentes Angular
+- frontend/src/services/: servicios de comunicación con el backend
+- frontend/src/assets/: recursos estáticos
+- frontend/src/theme/: estilos
 
 ## Notas
 - Usuario MySQL por defecto: `root` sin contraseña (ajuste `.env` si difiere).
