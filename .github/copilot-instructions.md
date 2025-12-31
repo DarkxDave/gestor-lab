@@ -1,15 +1,16 @@
 # GitHub Copilot Instructions
 
 ## Project Context
-- Stack: Node.js + Express + EJS
-- DB: MySQL (via XAMPP/phpMyAdmin)
-- Features: Multiple forms (textbox/checkbox), save/load sample IDs, export to Excel
+- **Frontend**: Ionic/Angular (Standalone Components, TypeScript, SCSS) running on port 8100
+- **Backend**: Node.js + Express (JSON API only, no EJS views) running on port 3000
+- **DB**: MySQL (via XAMPP/phpMyAdmin)
+- **Architecture**: Separate frontend SPA and backend REST API; frontend proxies `/api/*` to backend
+- **Features**: Multiple forms (textbox/checkbox), create/edit samples, load/save via API, export to Excel
 
 ## What to Generate
-- Routes, controllers, models with async/await and prepared statements
-- EJS views using Bootstrap
-- Excel export logic
-- Minimal, focused snippets aligned to the active file
+**Backend**: Routes, controllers, models with async/await and prepared statements; respond with JSON (no EJS rendering)
+**Frontend**: Standalone Angular components (with imports: IonicModule, FormsModule, CommonModule, RouterModule, HttpClientModule), services for API calls, Bootstrap/Ionic styling
+**Shared**: Excel export logic (via exceljs), HTTP client patterns for `/api/*` endpoints
 
 ## Constraints and Rules
 - Working directory: "."
@@ -23,25 +24,43 @@
 - Use Node + mysql2, dotenv for secrets, nodemon for dev
 
 ## Development Conventions
-- Express routers per feature
-- Models: parameterized queries with mysql2
-- Controllers: validate input, handle errors, return clear messages
-- EJS: layouts/partials, Bootstrap classes
-- Excel export via a maintained library (e.g., exceljs)
-- Environment via .env (document required keys)
+**Backend (Express API)**:
+- All routes prefixed with `/api` (e.g., `/api/form-tpa`, `/api/samples`, `/api/export/all`)
+- Controllers: validate input, handle errors, return JSON responses (e.g., `res.json({ data, message })` or `res.status(500).json({ error })`)
+- Models: parameterized queries with mysql2; no EJS view rendering
+- No static view engine; disabled `app.set('view engine', 'ejs')` and view directory
+
+**Frontend (Ionic/Angular)**:
+- Standalone components (each imports dependencies it uses)
+- Inject `HttpClient`, `Router`, `ActivatedRoute` as needed
+- Call `/api/*` endpoints (frontend dev server proxies via `proxy.conf.json` to `http://localhost:3000`)
+- Routes: add new pages in `src/app/pages/*` and register in `app.routes.ts`
+- Use `ActionSheetController`, `IonSegment`, etc. from `@ionic/angular`
+
+**Shared**:
+- Excel export: use exceljs, triggered via `/api/export/all?sample_id=...`
+- Environment: `.env` in backend only (API credentials, DB config)
 
 ## Progress Tracking
-- [x] copilot-instructions.md exists
-- [x] Requirements clarified
-- [x] Project scaffolded
-- [x] Customized (forms/routes/models/export)
-- [x] Extensions: none required
-- [x] Dependencies installed
-- [x] VS Code task: Run Dev Server (nodemon)
-- [x] Launch at http://localhost:3000 with MySQL running
-- [x] README updated (Windows/XAMPP)
+- [x] Ionic/Angular frontend scaffolded (standalone components)
+- [x] Backend converted to JSON API (no EJS)
+- [x] All routes prefixed with `/api`
+- [x] Frontend-backend communication via HTTP/proxy
+- [x] Create/edit sample forms working
+- [x] Excel export logic integrated
+- [x] MySQL integration via mysql2
+- [x] Development servers: backend on 3000, frontend on 8100
+- [x] nodemon watching backend changes
+
+## Running the Application
+**Backend**: `cd ionic-app/server && npm run dev` (listens on `http://localhost:3000`)
+**Frontend**: `cd ionic-app && ionic serve --host=localhost --port=8100 --no-open` (listens on `http://localhost:8100`)
+**Database**: Ensure MySQL is running via XAMPP; tables created via `server/scripts/init_db.sql`
 
 ## Task Completion Definition
-- Project builds without errors
-- This file and README are present and current
-- Clear instructions to debug/launch are provided
+- Backend API starts without errors (`Servidor iniciado en http://localhost:3000`)
+- Frontend compiles without errors (ng serve ready)
+- Forms load, create/edit samples, save via API, export to Excel
+- Router navigation stable; no unexpected redirects
+- All controllers return JSON; no EJS view rendering
+- This file and README updated and current

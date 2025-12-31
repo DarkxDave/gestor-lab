@@ -1,0 +1,363 @@
+/* Theme-aware underline variables for light/dark */
+:host {
+	/* Light theme: stronger, visible baseline underline */
+	--tpa-underline-color: rgba(0, 0, 0, 0.70);
+	--tpa-underline-strong: var(--ion-color-primary, #3880ff);
+	--tpa-underline-hover: rgba(0, 0, 0, 0.85);
+}
+
+:host-context(.dark) {
+	--tpa-underline-color: rgba(255, 255, 255, 0.55);
+	--tpa-underline-hover: rgba(255, 255, 255, 0.75);
+}
+/* ESTILOS GLOBALES AGRESIVOS PARA TODOS LOS INPUTS */
+:host ion-input::part(native),
+:host ion-textarea::part(native) {
+	border: none !important;
+	border-bottom: 2px solid var(--tpa-underline-color) !important;
+	padding: 8px 6px 6px !important;
+	background: transparent !important;
+	width: 100% !important;
+	min-height: 36px !important;
+	transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease !important;
+	display: block !important;
+}
+
+:host ion-input.has-value::part(native),
+:host ion-textarea.has-value::part(native) {
+	border-bottom: 2px solid var(--tpa-underline-strong) !important;
+	background: color-mix(in srgb, var(--tpa-underline-strong) 10%, transparent) !important;
+}
+
+:host ion-input:focus-within::part(native),
+:host ion-textarea:focus-within::part(native) {
+	border-bottom: 2px solid var(--tpa-underline-strong) !important;
+	box-shadow: 0 2px 0 0 var(--tpa-underline-strong) !important;
+}
+
+/* Refuerzo vía CSS vars para Ionic Input */
+:host ion-input,
+:host ion-textarea {
+	--background: transparent !important;
+	--color: var(--ion-text-color, #1e1e1e) !important;
+	--padding-top: 8px !important;
+	--padding-bottom: 8px !important;
+	--padding-start: 6px !important;
+	--padding-end: 6px !important;
+	--border-color: transparent !important;
+	--highlight-color: var(--ion-color-medium, #6b6b6b) !important;
+	--highlight-color-focused: var(--ion-color-primary, #3880ff) !important;
+	--highlight-height: 2px !important;
+}
+
+/* Espaciado para tabla de micropipetas (1 ml / 10 ml) */
+.micropipetas-table {
+	border-collapse: separate;
+	border-spacing: 18px 6px; /* horizontal / vertical */
+}
+
+.micropipetas-table th,
+.micropipetas-table td {
+	padding: 6px 10px;
+}
+
+.micropipetas-table th {
+	text-align: center;
+}
+
+/* Espaciado para tabla de Equipos para Pesado / Lugar de almacenamiento */
+.equipment-table {
+	border-collapse: separate;
+	border-spacing: 22px 10px; /* más aire entre columnas y filas */
+}
+
+.equipment-table th,
+.equipment-table td {
+	padding: 6px 10px;
+	text-align: center;
+}
+
+/* Compactar tabla de Manipulación de Muestras (1) */
+.manipulacion-table {
+	font-size: 0.9rem;
+	border-collapse: separate;
+	border-spacing: 8px 6px;
+}
+
+.manipulacion-table th,
+.manipulacion-table td {
+	padding: 4px 6px;
+}
+
+.manipulacion-table ion-item {
+	--padding-start: 0;
+	--inner-padding-end: 0;
+}
+
+/* Quitar bordes de celdas en tablas con inputs (evitar doble línea) */
+.clave-table th,
+.clave-table td,
+.manipulacion-table th,
+.manipulacion-table td,
+.manipulacion-table tr,
+.manipulacion-table {
+	border: none !important;
+	border-collapse: separate;
+	background: transparent;
+}
+
+/* Inputs suaves y sin bordes marcados dentro de tablas y ion-items */
+table ion-input,
+table ion-textarea,
+ion-item ion-input,
+ion-item ion-textarea,
+ion-input,
+ion-textarea {
+	--background: transparent;
+	--color: var(--ion-text-color, #1e1e1e);
+	--padding-top: 8px;
+	--padding-bottom: 8px;
+	--padding-start: 6px;
+	--padding-end: 6px;
+	--border-color: transparent;
+	--highlight-color: var(--ion-color-medium, #6b6b6b);
+	--highlight-color-focused: var(--ion-color-primary, #3880ff);
+	--highlight-height: 2px;
+}
+
+table ion-input::part(native),
+table ion-textarea::part(native),
+ion-item ion-input::part(native),
+ion-item ion-textarea::part(native),
+ion-input::part(native),
+ion-textarea::part(native) {
+	background: transparent;
+	border: none;
+	border-bottom: 2px solid var(--tpa-underline-color);
+	border-radius: 0;
+	padding: 8px 6px 6px;
+	width: 100%;
+	color: var(--ion-text-color, #1e1e1e);
+	min-height: 36px;
+	transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
+}
+
+/* Mirror RAM’s table input visibility using ::ng-deep for Shadow DOM */
+:host ::ng-deep table ion-input::part(native),
+:host ::ng-deep table ion-textarea::part(native) {
+	background: transparent;
+	border: none;
+	border-bottom: 1.5px solid var(--ion-color-medium, #6b6b6b);
+	border-radius: 0;
+	padding: 8px 6px 6px;
+	width: 100%;
+	margin: 0;
+	color: var(--ion-text-color, #1e1e1e);
+	min-height: 36px;
+	transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+
+/* Reinforce via Ionic CSS vars like RAM */
+:host ::ng-deep table ion-input,
+:host ::ng-deep table ion-textarea {
+	--background: transparent;
+	--color: var(--ion-text-color, #1e1e1e);
+	--padding-top: 8px;
+	--padding-bottom: 8px;
+	--padding-start: 6px;
+	--padding-end: 6px;
+	--border-color: transparent;
+	--highlight-color: var(--ion-color-medium, #6b6b6b);
+	--highlight-color-focused: var(--ion-color-primary, #3880ff);
+	--highlight-height: 2px;
+	border: none;
+	/* Restore baseline underline on the element to avoid disappearing lines */
+	border-bottom: 1.5px solid var(--ion-color-medium, #6b6b6b);
+	width: 100%;
+	margin: 0;
+	box-sizing: border-box;
+}
+
+/* Improve spacing between columns and rows inside tables */
+:host ::ng-deep table {
+	border-collapse: separate;
+	border-spacing: 16px 10px; /* column gap, row gap */
+}
+
+:host ::ng-deep table td {
+	padding: 4px 8px;
+}
+
+/* Extra spacing for inline field pairs like Retiro / Pesado */
+:host ::ng-deep table tr > td + td {
+	padding-left: 16px;
+}
+
+/* Segment separators for Manipulación de Muestras (1): draw horizontal lines */
+:host ::ng-deep .manipulacion-table tbody tr {
+	position: relative;
+}
+
+:host ::ng-deep .manipulacion-table tbody tr:not(:last-child) {
+	border-bottom: none;
+}
+
+/* Continuous separator across full row width */
+:host ::ng-deep .manipulacion-table tbody tr:not(:last-child)::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: -10px;
+	height: 1B45px;
+	background: var(--ion-color-medium, #6b6b6b);
+}
+
+:host ::ng-deep .manipulacion-table tbody tr:not(:last-child) td {
+	padding-bottom: 22px; /* add space above separator */
+}
+
+:host ::ng-deep .manipulacion-table thead th {
+	border-bottom: 2px solid var(--ion-color-medium, #6b6b6b);
+}
+
+/* Remove underline for date/time fields */
+:host ::ng-deep table ion-input[type="date"],
+:host ::ng-deep table ion-input[type="time"],
+:host ::ng-deep ion-item ion-input[type="date"],
+:host ::ng-deep ion-item ion-input[type="time"] {
+	border: none !important;
+	border-bottom: none !important;
+}
+
+:host ::ng-deep table ion-input[type="date"]::part(native),
+:host ::ng-deep table ion-input[type="time"]::part(native),
+:host ::ng-deep ion-item ion-input[type="date"]::part(native),
+:host ::ng-deep ion-item ion-input[type="time"]::part(native) {
+	border: none !important;
+	border-bottom: none !important;
+	width: 100% !important;
+	margin: 0 !important;
+}
+
+/* Layout for Hora inicio / Hora término: label above, input below with spacing */
+:host ::ng-deep ion-item.time-field {
+	display: block;
+	--inner-padding-top: 8px;
+	--inner-padding-bottom: 8px;
+}
+
+:host ::ng-deep ion-item.time-field ion-label {
+	display: block;
+	margin-bottom: 6px;
+	font-weight: 600;
+}
+
+:host ::ng-deep ion-item.time-field ion-input[type="time"]::part(native) {
+	min-height: 36px;
+	padding: 6px 0;
+}
+
+/* Has-value and focus behavior in tables like RAM */
+:host ::ng-deep table ion-input.has-value::part(native),
+:host ::ng-deep table ion-textarea.has-value::part(native) {
+	border-bottom-color: var(--ion-color-primary, #3880ff);
+	box-shadow: none;
+	background: color-mix(in srgb, var(--ion-color-primary, #3880ff) 8%, transparent);
+}
+
+:host ::ng-deep table ion-input:focus-within::part(native),
+:host ::ng-deep table ion-textarea:focus-within::part(native) {
+	border-bottom-color: var(--ion-color-primary, #3880ff);
+	box-shadow: 0 2px 0 0 var(--ion-color-primary, #3880ff);
+}
+
+table ion-input.has-value::part(native),
+table ion-textarea.has-value::part(native),
+ion-item ion-input.has-value::part(native),
+ion-item ion-textarea.has-value::part(native),
+ion-input.has-value::part(native),
+ion-textarea.has-value::part(native) {
+	border-bottom: 2px solid var(--tpa-underline-strong);
+	box-shadow: none;
+	background: color-mix(in srgb, var(--tpa-underline-strong) 10%, transparent);
+}
+
+table ion-input:focus-within::part(native),
+table ion-textarea:focus-within::part(native),
+ion-item ion-input:focus-within::part(native),
+ion-item ion-textarea:focus-within::part(native),
+ion-input:focus-within::part(native),
+ion-textarea:focus-within::part(native) {
+	border-bottom: 2px solid var(--tpa-underline-strong);
+	box-shadow: 0 2px 0 0 var(--tpa-underline-strong);
+}
+
+table ion-textarea::part(native),
+ion-item ion-textarea::part(native) {
+	min-height: 42px;
+}
+
+/* Refuerzo ::ng-deep para inputs dentro de tablas (Ionic Shadow DOM) */
+:host ::ng-deep table ion-input::part(native),
+:host ::ng-deep table ion-textarea::part(native),
+:host ::ng-deep ion-input::part(native),
+:host ::ng-deep ion-textarea::part(native) {
+	background: transparent;
+	border: none;
+	border-bottom: 1.5px solid var(--ion-color-medium, #6b6b6b);
+	border-radius: 0;
+	padding: 8px 6px 6px;
+	width: 100%;
+	color: var(--ion-text-color, #1e1e1e);
+	min-height: 36px;
+	transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+
+:host ::ng-deep table ion-input.has-value::part(native),
+:host ::ng-deep table ion-textarea.has-value::part(native),
+:host ::ng-deep ion-input.has-value::part(native),
+:host ::ng-deep ion-textarea.has-value::part(native) {
+	border-bottom-color: var(--ion-color-primary, #3880ff);
+	box-shadow: none;
+	background: color-mix(in srgb, var(--ion-color-primary, #3880ff) 8%, transparent);
+}
+
+:host ::ng-deep table ion-input:focus-within::part(native),
+:host ::ng-deep table ion-textarea:focus-within::part(native),
+:host ::ng-deep ion-input:focus-within::part(native),
+:host ::ng-deep ion-textarea:focus-within::part(native) {
+	border-bottom-color: var(--ion-color-primary, #3880ff);
+	box-shadow: 0 2px 0 0 var(--ion-color-primary, #3880ff);
+}
+
+/* Variantes de fecha/hora con el mismo estilo amigable */
+:host ::ng-deep table ion-input[type="date"],
+:host ::ng-deep table ion-input[type="time"],
+ion-input[type="date"],
+ion-input[type="time"] {
+	--highlight-color: transparent;
+	--highlight-color-focused: transparent;
+	--highlight-height: 0;
+}
+
+:host ::ng-deep table ion-input[type="date"]::part(native),
+:host ::ng-deep table ion-input[type="time"]::part(native),
+ion-input[type="date"]::part(native),
+ion-input[type="time"]::part(native) {
+	background: #f5f7fb;
+	border: 1px solid #d9e2ef;
+	border-radius: 10px;
+	padding: 10px 12px;
+	width: 100%;
+	box-shadow: 0 1px 2px rgba(16, 24, 40, 0.12);
+	color: var(--ion-text-color, #1e1e1e);
+	min-height: 40px;
+}
+
+/* Avoid double underline inside ion-item containers */
+:host ::ng-deep ion-item ion-input,
+:host ::ng-deep ion-item ion-textarea {
+	border: none !important;
+	border-bottom: none !important;
+}

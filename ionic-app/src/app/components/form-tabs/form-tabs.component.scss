@@ -1,0 +1,63 @@
+ion-segment {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  ion-segment-button {
+    min-height: 40px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    flex: 0 1 auto;
+    max-width: 150px;
+    
+    &[ng-reflect-value="tpa"] {
+      &.segment-button-checked {
+        background: #007bff;
+        color: white;
+      }
+    }
+    
+    &[ng-reflect-value="ram"] {
+      &.segment-button-checked {
+        background: #17a2b8;
+        color: white;
+      }
+    }
+    
+    &[ng-reflect-value="rmyl"] {
+      &.segment-button-checked {
+        background: #6f42c1;
+        color: white;
+      }
+    }
+    
+    &[ng-reflect-value="ctcfe"] {
+      &.segment-button-checked {
+        background: #28a745;
+        color: white;
+      }
+    }
+    
+    &[ng-reflect-value="sal"] {
+      &.segment-button-checked {
+        background: #ffc107;
+        color: #212529;
+      }
+    }
+    
+    &[ng-reflect-value="entero"] {
+      &.segment-button-checked {
+        background: #dc3545;
+        color: white;
+      }
+    }
+    
+    &[ng-reflect-value="saureus"] {
+      &.segment-button-checked {
+        background: #6c757d;
+        color: white;
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      Gestor de Muestras
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button routerLink="/" routerDirection="root">
+        <ion-icon slot="start" name="home"></ion-icon>
+        Inicio
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="p-4 bg-light rounded-3">
+    <p class="lead">Registre y edite datos de muestras en múltiples formularios y exporte todo a Excel.</p>
+    <ion-button expand="block" (click)="openSampleChoice()" routerDirection="forward">Elegir acción</ion-button>
+  </div>
+</ion-content>

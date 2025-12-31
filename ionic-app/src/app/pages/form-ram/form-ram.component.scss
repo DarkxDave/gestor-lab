@@ -1,0 +1,116 @@
+/* Compact ALI band - theme aware */
+.ali-card {
+	background: var(--ion-card-background, #ffffff);
+	color: var(--ion-text-color, #000000);
+	border: 1px solid var(--ion-color-medium, #ced4da);
+}
+
+.ali-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 1rem;
+	font-weight: 600;
+}
+
+.ali-label {
+	letter-spacing: 0.5px;
+}
+
+.ali-value {
+	font-weight: 600;
+}
+
+/* Resultado CFU: caja visible en tema claro y oscuro */
+.result-cfu-box {
+	font-size: 1.5rem;
+	font-weight: 700;
+	padding: 1rem;
+	border-radius: 4px;
+	background: var(--ion-item-background, var(--ion-color-step-150, #2b2b2b));
+	color: var(--ion-text-color, #ffffff);
+	box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+/* Resaltar campos con texto */
+ion-input::part(native),
+ion-textarea::part(native) {
+	border: none;
+	border-bottom: 1px solid var(--ion-color-medium, #ced4da);
+	padding: 4px 0;
+}
+
+ion-input.has-value::part(native),
+ion-textarea.has-value::part(native) {
+	border-bottom: 2px solid var(--ion-color-primary, #3880ff);
+	background: color-mix(in srgb, var(--ion-color-primary, #3880ff) 8%, transparent);
+}
+
+/* Tabla de datos: inputs visibles en celdas */
+.table table,
+table.table {
+	width: 100%;
+}
+
+/* Asegurar que los inputs en tablas sean visibles */
+:host ::ng-deep table ion-input::part(native),
+:host ::ng-deep table ion-textarea::part(native) {
+	background: transparent;
+	border: none;
+	border-bottom: 1.5px solid var(--ion-color-medium, #6b6b6b);
+	border-radius: 0;
+	padding: 8px 6px 6px;
+	width: 70%;
+	margin: 0 auto;
+	color: var(--ion-text-color, #1e1e1e);
+	min-height: 36px;
+	transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+
+/* Refuerzo vía CSS vars para Ionic Input en tablas */
+:host ::ng-deep table ion-input,
+:host ::ng-deep table ion-textarea {
+	--background: transparent;
+	--color: var(--ion-text-color, #1e1e1e);
+	--padding-top: 8px;
+	--padding-bottom: 8px;
+	--padding-start: 6px;
+	--padding-end: 6px;
+	--border-color: transparent;
+	--highlight-color: var(--ion-color-medium, #6b6b6b);
+	--highlight-color-focused: var(--ion-color-primary, #3880ff);
+	--highlight-height: 2px;
+	border: none;
+	border-bottom: 1.5px solid var(--ion-color-medium, #6b6b6b);
+	width: 70%;
+	margin: 0 auto;
+	box-sizing: border-box;
+}
+
+/* No subrayado para campos de fecha/hora en tablas */
+:host ::ng-deep table ion-input[type="date"],
+:host ::ng-deep table ion-input[type="time"] {
+	border: none;
+	border-bottom: none;
+}
+
+:host ::ng-deep table ion-input[type="date"]::part(native),
+:host ::ng-deep table ion-input[type="time"]::part(native) {
+	border: none;
+	border-bottom: none;
+	width: 100%;
+	margin: 0;
+}
+
+:host ::ng-deep table ion-input.has-value::part(native),
+:host ::ng-deep table ion-textarea.has-value::part(native) {
+	border-bottom-color: var(--ion-color-primary, #3880ff);
+	box-shadow: none;
+	background: color-mix(in srgb, var(--ion-color-primary, #3880ff) 8%, transparent);
+}
+
+:host ::ng-deep table ion-input:focus-within::part(native),
+:host ::ng-deep table ion-textarea:focus-within::part(native) {
+	border-bottom-color: var(--ion-color-primary, #3880ff);
+	box-shadow: 0 2px 0 0 var(--ion-color-primary, #3880ff);
+}

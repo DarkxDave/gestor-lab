@@ -1,0 +1,419 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/"></ion-back-button>
+    </ion-buttons>
+    <ion-title>RAM: Enumeración de Aerobios Mesófilos</ion-title>
+    <ion-buttons slot="end">
+      <ion-button routerLink="/" routerDirection="root">
+        <ion-icon slot="start" name="home"></ion-icon>
+        Inicio
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- Tabs para navegar entre formularios -->
+  <app-form-tabs [sampleId]="sampleId"></app-form-tabs>
+
+  <!-- Cargar y Exportar -->
+  <form (ngSubmit)="loadSampleData()" class="ion-margin-bottom">
+    <div class="ion-margin-bottom">
+      <ion-item>
+        <ion-label position="floating">ALI</ion-label>
+        <ion-input type="text" [(ngModel)]="currentSampleId" name="sample_id" required [disabled]="isEditMode"></ion-input>
+      </ion-item>
+    </div>
+    <div class="ion-display-flex ion-justify-content-around">
+      <ion-button type="submit" expand="block" [disabled]="isLoading">
+        <span *ngIf="!isLoading">Cargar</span>
+        <span *ngIf="isLoading">Cargando...</span>
+      </ion-button>
+      <ion-button expand="block" color="secondary" routerLink="/samples" [disabled]="isLoading">Muestras</ion-button>
+      <ion-button type="button" expand="block" color="success" (click)="exportToExcel()" [disabled]="isLoading">Exportar Excel</ion-button>
+    </div>
+  </form>
+
+  <div *ngIf="message" class="ion-padding ion-margin ion-text-center" style="background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px; color: #0c5460;">
+    {{ message }}
+  </div>
+
+  <!-- Header Card -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title class="ion-text-center">TRAZABILIDAD ANÁLISIS: ENUMERACIÓN DE AEROBIOS MESÓFILOS</ion-card-title>
+      <ion-card-subtitle class="ion-text-center">NCh 2659.Of 2002 | R-PR-SVVM-M-4-11 / 15-02-23</ion-card-subtitle>
+    </ion-card-header>
+  </ion-card>
+
+  <!-- ID Band -->
+  <ion-card class="ali-card">
+    <ion-card-content>
+      <div class="ali-row">
+        <span class="ali-label">ALI:</span>
+        <span class="ali-value">{{ sampleId || '---' }}</span>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Formulario Principal -->
+  <form (ngSubmit)="saveForm()">
+    
+    <!-- Fechas y análisis -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Fechas y Análisis</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="12" size-lg="6">
+              <ion-card color="light">
+                <ion-card-header>
+                  <ion-card-subtitle>Inicio Incubación</ion-card-subtitle>
+                </ion-card-header>
+                <ion-card-content>
+                  <ion-item>
+                    <ion-label position="floating">Fecha</ion-label>
+                    <ion-input type="date" [(ngModel)]="formData.inicio_incubacion_fecha" name="inicio_incubacion_fecha"></ion-input>
+                  </ion-item>
+                  <ion-item>
+                    <ion-label position="floating">Hora</ion-label>
+                    <ion-input type="time" [(ngModel)]="formData.inicio_incubacion_hora" name="inicio_incubacion_hora"></ion-input>
+                  </ion-item>
+                  <ion-item>
+                    <ion-label position="floating">Analista</ion-label>
+                    <ion-input type="text" [(ngModel)]="formData.inicio_incubacion_analista" name="inicio_incubacion_analista"></ion-input>
+                  </ion-item>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+            <ion-col size="12" size-lg="6">
+              <ion-card color="light">
+                <ion-card-header>
+                  <ion-card-subtitle>Término Análisis</ion-card-subtitle>
+                </ion-card-header>
+                <ion-card-content>
+                  <ion-item>
+                    <ion-label position="floating">Fecha</ion-label>
+                    <ion-input type="date" [(ngModel)]="formData.termino_analisis_fecha" name="termino_analisis_fecha"></ion-input>
+                  </ion-item>
+                  <ion-item>
+                    <ion-label position="floating">Hora</ion-label>
+                    <ion-input type="time" [(ngModel)]="formData.termino_analisis_hora" name="termino_analisis_hora"></ion-input>
+                  </ion-item>
+                  <ion-item>
+                    <ion-label position="floating">Analista</ion-label>
+                    <ion-input type="text" [(ngModel)]="formData.termino_analisis_analista" name="termino_analisis_analista"></ion-input>
+                  </ion-item>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Set de Análisis -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Set de Análisis</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle">
+            <tbody>
+              <tr>
+                <td><strong>Control Ambiental Pesado: T°:</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.cc2_pesado_temp" name="cc2_pesado_temp"></ion-input></td>
+                <td><strong>UFC:</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.cc2_pesado_ufc" name="cc2_pesado_ufc"></ion-input></td>
+                <td><strong>Control ambiental Siembra:</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.cc2_siembra" name="cc2_siembra"></ion-input></td>
+              </tr>
+              <tr>
+                <td><strong>Hora inicio:</strong></td>
+                <td><ion-input type="time" [(ngModel)]="formData.cc2_hora_inicio" name="cc2_hora_inicio"></ion-input></td>
+                <td><strong>Hora término:</strong></td>
+                <td><ion-input type="time" [(ngModel)]="formData.cc2_hora_termino" name="cc2_hora_termino"></ion-input></td>
+                <td><strong>T°:</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.cc2_temp" name="cc2_temp"></ion-input></td>
+              </tr>
+              <tr>
+                <td><strong>Control de siembra E. Coli (UFC):</strong></td>
+                <td colspan="2"><ion-input type="text" [(ngModel)]="formData.cc2_ecoli_ufc" name="cc2_ecoli_ufc"></ion-input></td>
+                <td><strong>Blanco (UFC):</strong></td>
+                <td colspan="2"><ion-input type="text" [(ngModel)]="formData.cc2_blanco_ufc" name="cc2_blanco_ufc"></ion-input></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Siembra -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Siembra</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item>
+          <ion-label>Tiempo entre homogenizado y siembra &lt; 15 minutos</ion-label>
+          <ion-checkbox slot="start" [(ngModel)]="formData.siembra_tiempo_ok" name="siembra_tiempo_ok"></ion-checkbox>
+        </ion-item>
+        <ion-item>
+          <ion-label position="floating">N° de Muestra (10gr/90ml)</ion-label>
+          <ion-input type="text" [(ngModel)]="formData.siembra_n_muestra_10g_90ml" name="siembra_n_muestra_10g_90ml"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="floating">N° de Muestra (50gr/450ml)</ion-label>
+          <ion-input type="text" [(ngModel)]="formData.siembra_n_muestra_50g_450ml" name="siembra_n_muestra_50g_450ml"></ion-input>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Control de Calidad -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Controles de Calidad</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle">
+            <thead>
+              <tr class="ion-text-center">
+                <th style="width: 20%">Ítem</th>
+                <th style="width: 30%">Análisis</th>
+                <th style="width: 25%">Cumple</th>
+                <th style="width: 25%">No Cumple</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Duplicado en ALI</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.cc_duplicado_ali_analisis" name="cc_duplicado_ali_analisis"></ion-input></td>
+                <td class="ion-text-center">
+                  <ion-radio-group [(ngModel)]="formData.cc_duplicado_ali_cumple" name="cc_duplicado_ali_cumple">
+                    <ion-radio value="1"></ion-radio>
+                  </ion-radio-group>
+                </td>
+                <td class="ion-text-center">
+                  <ion-radio-group [(ngModel)]="formData.cc_duplicado_ali_cumple" name="cc_duplicado_ali_cumple_no">
+                    <ion-radio value="0"></ion-radio>
+                  </ion-radio-group>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Control (+) y Blanco en ALI</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.cc_control_pos_blanco_ali_analisis" name="cc_control_pos_blanco_ali_analisis"></ion-input></td>
+                <td class="ion-text-center">
+                  <ion-radio-group [(ngModel)]="formData.cc_control_pos_blanco_ali_cumple" name="cc_control_pos_blanco_ali_cumple">
+                    <ion-radio value="1"></ion-radio>
+                  </ion-radio-group>
+                </td>
+                <td class="ion-text-center">
+                  <ion-radio-group [(ngModel)]="formData.cc_control_pos_blanco_ali_cumple" name="cc_control_pos_blanco_ali_cumple_no">
+                    <ion-radio value="0"></ion-radio>
+                  </ion-radio-group>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Control de Siembra en ALI</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.cc_control_siembra_ali_analisis" name="cc_control_siembra_ali_analisis"></ion-input></td>
+                <td class="ion-text-center">
+                  <ion-radio-group [(ngModel)]="formData.cc_control_siembra_ali_cumple" name="cc_control_siembra_ali_cumple">
+                    <ion-radio value="1"></ion-radio>
+                  </ion-radio-group>
+                </td>
+                <td class="ion-text-center">
+                  <ion-radio-group [(ngModel)]="formData.cc_control_siembra_ali_cumple" name="cc_control_siembra_ali_cumple_no">
+                    <ion-radio value="0"></ion-radio>
+                  </ion-radio-group>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- MIC Parte II -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Manual de Inocuidad y Certificación Parte II Sección III Cap IV pto 1 y 2</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle">
+            <tbody>
+              <tr>
+                <td style="width: 25%"><strong>Desfavorable:</strong></td>
+                <td class="ion-text-center" style="width: 10%">
+                  <ion-item lines="none">
+                    <ion-label>SI</ion-label>
+                    <ion-checkbox slot="start" [(ngModel)]="formData.mic_desfavorable_si" name="mic_desfavorable_si"></ion-checkbox>
+                  </ion-item>
+                </td>
+                <td class="ion-text-center" style="width: 10%">
+                  <ion-item lines="none">
+                    <ion-label>NO</ion-label>
+                    <ion-checkbox slot="start" [(ngModel)]="formData.mic_desfavorable_no" name="mic_desfavorable_no"></ion-checkbox>
+                  </ion-item>
+                </td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><strong>Tabla/Página:</strong></td>
+                <td colspan="2"><ion-input type="text" [(ngModel)]="formData.mic_tabla_pagina" name="mic_tabla_pagina"></ion-input></td>
+                <td>
+                  <strong>Límite:</strong>
+                  <ion-input type="text" [(ngModel)]="formData.mic_limite" name="mic_limite"></ion-input>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Fecha y hora de entrega:</strong></td>
+                <td style="width: 20%">
+                  <ion-input type="date" [(ngModel)]="formData.mic_fecha_entrega" name="mic_fecha_entrega"></ion-input>
+                </td>
+                <td style="width: 20%">
+                  <ion-input type="time" [(ngModel)]="formData.mic_hora_entrega" name="mic_hora_entrega"></ion-input>
+                </td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Datos -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Datos</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="floating"><strong>Suspensión Inicial 1/:</strong></ion-label>
+                <ion-input type="text" [(ngModel)]="formData.datos_suspension_inicial_den" name="datos_suspension_inicial_den" (ionInput)="onInputChange()"></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="floating"><strong>Volumen/Petri dish [mL]:</strong></ion-label>
+                <ion-input type="text" [(ngModel)]="formData.datos_volumen_petri_ml" name="datos_volumen_petri_ml" (ionInput)="onInputChange()"></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="floating">Dilución (Ej: -2 para 10^-2)</ion-label>
+                <ion-input type="text" [(ngModel)]="formData.datos_dilucion_log10_1" name="datos_dilucion_log10_1" (ionInput)="onInputChange()"></ion-input>
+              </ion-item>
+              <ion-note class="ion-padding-start">Las siguientes filas se calculan restando 1 por fila.</ion-note>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+
+        <!-- Tabla de Dilución y Colonias -->
+        <div class="table-responsive ion-margin-top">
+          <table class="table table-bordered align-middle">
+            <thead>
+              <tr class="ion-text-center">
+                <th rowspan="2" style="width:8%">Dilución</th>
+                <th colspan="2">N° Colonias</th>
+                <th colspan="2">Colonias por confirmar</th>
+                <th colspan="2">Colonias confirmadas</th>
+                <th colspan="2">N° final de colonias</th>
+              </tr>
+              <tr class="ion-text-center">
+                <th>Lámina A</th><th>Lámina B</th>
+                <th>Lámina A</th><th>Lámina B</th>
+                <th>Lámina A</th><th>Lámina B</th>
+                <th>Lámina A</th><th>Lámina B</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let i of [1,2,3,4,5]">
+                <td class="ion-text-center"><strong>{{ i }}</strong></td>
+                <td><ion-input type="text" [name]="'datos_colonias_num_a_' + i" [(ngModel)]="formData['datos_colonias_num_a_' + i]" (ionInput)="onInputChange()"></ion-input></td>
+                <td><ion-input type="text" [name]="'datos_colonias_num_b_' + i" [(ngModel)]="formData['datos_colonias_num_b_' + i]" (ionInput)="onInputChange()"></ion-input></td>
+                <td><ion-input type="text" [name]="'datos_colonias_por_conf_a_' + i" [(ngModel)]="formData['datos_colonias_por_conf_a_' + i]" (ionInput)="onInputChange()"></ion-input></td>
+                <td><ion-input type="text" [name]="'datos_colonias_por_conf_b_' + i" [(ngModel)]="formData['datos_colonias_por_conf_b_' + i]" (ionInput)="onInputChange()"></ion-input></td>
+                <td><ion-input type="text" [name]="'datos_colonias_conf_a_' + i" [(ngModel)]="formData['datos_colonias_conf_a_' + i]" (ionInput)="onInputChange()"></ion-input></td>
+                <td><ion-input type="text" [name]="'datos_colonias_conf_b_' + i" [(ngModel)]="formData['datos_colonias_conf_b_' + i]" (ionInput)="onInputChange()"></ion-input></td>
+                <td><ion-input type="text" [name]="'datos_colonias_final_a_' + i" [value]="formData['datos_colonias_final_a_' + i]" readonly></ion-input></td>
+                <td><ion-input type="text" [name]="'datos_colonias_final_b_' + i" [value]="formData['datos_colonias_final_b_' + i]" readonly></ion-input></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Resultados -->
+        <ion-grid class="ion-margin-top">
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-card color="light">
+                <ion-card-header>
+                  <ion-card-subtitle>Número de CFU/g o mL</ion-card-subtitle>
+                </ion-card-header>
+                <ion-card-content>
+                  <div class="ion-text-center result-cfu-box">
+                    {{ resultCFU }}
+                  </div>
+                  <ion-note class="ion-padding-top">Formato: notación científica.</ion-note>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <ion-card color="light">
+                <ion-card-header>
+                  <ion-card-subtitle>Aceptación por dilución</ion-card-subtitle>
+                </ion-card-header>
+                <ion-card-content>
+                  <div class="ion-padding">
+                    <ion-chip *ngFor="let item of dilutionAcceptance" 
+                              [color]="item.status === 'YES' ? 'success' : (item.status === 'NO' ? 'danger' : 'medium')">
+                      <ion-label>{{ item.dilution }}ª: {{ item.status }}</ion-label>
+                    </ion-chip>
+                  </div>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Observaciones -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Observaciones</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item>
+          <ion-label position="floating">Observaciones</ion-label>
+          <ion-textarea rows="3" [(ngModel)]="formData.observaciones" name="observaciones"></ion-textarea>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Footer -->
+    <ion-card>
+      <ion-card-content>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="text-align: center; width: 320px;">
+            <hr>
+            <strong>FIRMA COORDINADOR DE ÁREA</strong>
+          </div>
+          <ion-button type="submit" [disabled]="isLoading" color="primary" size="large">
+            <span *ngIf="!isLoading">Guardar RAM</span>
+            <span *ngIf="isLoading">Guardando...</span>
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </form>
+</ion-content>

@@ -1,0 +1,445 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/" (click)="onBack($event)"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Formulario de Trazabilidad (TPA)</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="onGoHome()">
+        <ion-icon slot="start" name="home"></ion-icon>
+        Inicio
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- Tabs para navegar entre formularios -->
+  <app-form-tabs [sampleId]="sampleId"></app-form-tabs>
+
+  <!-- Cargar y Exportar -->
+  <form (ngSubmit)="loadSampleData()" class="ion-margin-bottom">
+    <div class="ion-margin-bottom">
+      <ion-item>
+        <ion-label position="floating">ALI</ion-label>
+        <ion-input type="text" [(ngModel)]="currentSampleId" name="sample_id" required [disabled]="isEditMode"></ion-input>
+      </ion-item>
+    </div>
+    <div class="ion-display-flex ion-justify-content-around">
+      <ion-button type="submit" expand="block" [disabled]="isLoading">
+        <span *ngIf="!isLoading">Cargar</span>
+        <span *ngIf="isLoading">Cargando...</span>
+      </ion-button>
+      <ion-button expand="block" color="secondary" routerLink="/samples" [disabled]="isLoading">Muestras</ion-button>
+      <ion-button type="button" expand="block" color="success" (click)="exportToExcel()" [disabled]="isLoading">Exportar Excel</ion-button>
+    </div>
+  </form>
+
+  <div *ngIf="message" class="ion-padding ion-margin ion-text-center" style="background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px; color: #0c5460;">
+    {{ message }}
+  </div>
+
+  <!-- Formulario Principal -->
+  <form (ngSubmit)="saveForm()" (change)="onInputChange()">
+    <!-- Sample ID -->
+    <ion-card>
+      <ion-card-content>
+        <ion-item>
+          <ion-label position="floating">ALI</ion-label>
+          <ion-input type="text" [(ngModel)]="formData.sample_id" name="sample_id" required [disabled]="isEditMode"></ion-input>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Almacenamiento -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Almacenamiento</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="ion-margin-bottom">
+          <ion-item>
+            <ion-label>Freezer 33-M</ion-label>
+            <ion-checkbox slot="start" [(ngModel)]="formData.storage_freezer_33m" name="storage_freezer_33m"></ion-checkbox>
+          </ion-item>
+          <ion-item>
+            <ion-label>Refrigerador 33-M</ion-label>
+            <ion-checkbox slot="start" [(ngModel)]="formData.storage_refrigerador_33m" name="storage_refrigerador_33m"></ion-checkbox>
+          </ion-item>
+          <ion-item>
+            <ion-label>Mesón siembra</ion-label>
+            <ion-checkbox slot="start" [(ngModel)]="formData.storage_meson_siembra" name="storage_meson_siembra"></ion-checkbox>
+          </ion-item>
+          <ion-item>
+            <ion-label>Gabinete sala Traspaso</ion-label>
+            <ion-checkbox slot="start" [(ngModel)]="formData.storage_gabinete_traspaso" name="storage_gabinete_traspaso"></ion-checkbox>
+          </ion-item>
+        </div>
+        <ion-item>
+          <ion-label position="floating">Observaciones</ion-label>
+          <ion-textarea [(ngModel)]="formData.observaciones" name="observaciones"></ion-textarea>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- MANIPULACIÓN DE MUESTRAS -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title class="ion-text-center">MANIPULACIÓN DE MUESTRAS (1)</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle manipulacion-table">
+            <thead>
+              <tr>
+                <th>Retiro</th>
+                <th>Pesado</th>
+                <th>Clave material pesado (Cuchara, Pinzas, Bisturí)</th>
+                <th>Responsable</th>
+                <th>Fecha</th>
+                <th>Hora inicio</th>
+                <th>Hora término</th>
+                <th>Nº muestra</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let i of [1, 2, 3]">
+                <td class="ion-text-center"><ion-checkbox [(ngModel)]="formData['retiro_muestra_' + i]" name="retiro_muestra_{{i}}"></ion-checkbox></td>
+                <td class="ion-text-center"><ion-checkbox [(ngModel)]="formData['pesado_' + i]" name="pesado_{{i}}"></ion-checkbox></td>
+                <td>
+                  <div class="ion-margin-vertical">
+                    <ion-item>
+                      <ion-label position="floating">Cuchara</ion-label>
+                      <ion-input type="text" [(ngModel)]="formData['clave_material_' + ((i-1)*3+1)]" name="clave_material_{{(i-1)*3+1}}"></ion-input>
+                    </ion-item>
+                  </div>
+                  <div class="ion-margin-vertical">
+                    <ion-item>
+                      <ion-label position="floating">Pinzas</ion-label>
+                      <ion-input type="text" [(ngModel)]="formData['clave_material_' + ((i-1)*3+2)]" name="clave_material_{{(i-1)*3+2}}"></ion-input>
+                    </ion-item>
+                  </div>
+                  <div class="ion-margin-vertical">
+                    <ion-item>
+                      <ion-label position="floating">Bisturí</ion-label>
+                      <ion-input type="text" [(ngModel)]="formData['clave_material_' + ((i-1)*3+3)]" name="clave_material_{{(i-1)*3+3}}"></ion-input>
+                    </ion-item>
+                  </div>
+                </td>
+                <td>
+                  <ion-item>
+                    <ion-label position="floating">Responsable</ion-label>
+                    <ion-input type="text" [(ngModel)]="formData['responsable_' + i]" name="responsable_{{i}}"></ion-input>
+                  </ion-item>
+                </td>
+                <td>
+                  <ion-item>
+                    <ion-label>Fecha</ion-label>
+                    <ion-input type="date" [(ngModel)]="formData['fecha_' + i]" name="fecha_{{i}}"></ion-input>
+                  </ion-item>
+                </td>
+                <td>
+                  <ion-item class="time-field">
+                    <ion-label>Hora inicio</ion-label>
+                    <ion-input type="time" [(ngModel)]="formData['hora_inicio_' + i]" name="hora_inicio_{{i}}"></ion-input>
+                  </ion-item>
+                </td>
+                <td>
+                  <ion-item class="time-field">
+                    <ion-label>Hora término</ion-label>
+                    <ion-input type="time" [(ngModel)]="formData['hora_termino_' + i]" name="hora_termino_{{i}}"></ion-input>
+                  </ion-item>
+                </td>
+                <td>
+                  <ion-item>
+                    <ion-label position="floating">Nº muestra</ion-label>
+                    <ion-input type="text" [(ngModel)]="formData['n_muestra_' + i]" name="n_muestra_{{i}}"></ion-input>
+                  </ion-item>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Equipos para Pesado y Lugar de Almacenamiento -->
+        <div class="table-responsive ion-margin-top">
+          <table class="table table-bordered equipment-table">
+            <thead>
+              <tr>
+                <th colspan="6" class="ion-text-center">Equipos para Pesado</th>
+                <th colspan="3" class="ion-text-center">Lugar de almacenamiento</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="ion-text-center">
+                  <ion-checkbox [(ngModel)]="formData.equipo_balanza_74m" name="equipo_balanza_74m"></ion-checkbox>
+                  <div>Balanza 74-M</div>
+                </td>
+                <td class="ion-text-center">
+                  <ion-checkbox [(ngModel)]="formData.equipo_camara_8m" name="equipo_camara_8m"></ion-checkbox>
+                  <div>Cámara flujo laminar 8-M</div>
+                </td>
+                <td class="ion-text-center">
+                  <ion-checkbox [(ngModel)]="formData.equipo_balanza_6m" name="equipo_balanza_6m"></ion-checkbox>
+                  <div>Balanza 6-M</div>
+                </td>
+                <td class="ion-text-center">
+                  <ion-checkbox [(ngModel)]="formData.equipo_meson_traspaso" name="equipo_meson_traspaso"></ion-checkbox>
+                  <div>Mesón de traspaso</div>
+                </td>
+                <td class="ion-text-center">
+                  <ion-checkbox [(ngModel)]="formData.equipo_balanza_99m" name="equipo_balanza_99m"></ion-checkbox>
+                  <div>Balanza 99-M</div>
+                </td>
+                <td class="ion-text-center">
+                  <ion-checkbox [(ngModel)]="formData.equipo_balanza_108m" name="equipo_balanza_108m"></ion-checkbox>
+                  <div>Balanza 108-M</div>
+                </td>
+                <td class="ion-text-center">
+                  <ion-checkbox [(ngModel)]="formData.equipo_freezer_33m" name="equipo_freezer_33m"></ion-checkbox>
+                  <div>Freezer 33-M</div>
+                </td>
+                <td class="ion-text-center">
+                  <ion-checkbox [(ngModel)]="formData.equipo_refrigerador_33m" name="equipo_refrigerador_33m"></ion-checkbox>
+                  <div>Refrigerador 33-M</div>
+                </td>
+                <td class="ion-text-center">
+                  <ion-checkbox [(ngModel)]="formData.equipo_gabinete_traspaso" name="equipo_gabinete_traspaso"></ion-checkbox>
+                  <div>Gabinete de Traspaso</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Micropipetas y Limpieza -->
+    <div class="ion-display-flex ion-flex-wrap">
+      <!-- Uso y limpieza de Micropipetas -->
+      <ion-card class="ion-flex-grow">
+        <ion-card-header>
+          <ion-card-title class="ion-text-center">Uso y limpieza de Micropipetas</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="ion-display-flex ion-justify-content-around">
+            <!-- Tabla 1ml y 10ml -->
+            <div style="flex: 1;">
+              <table class="table table-bordered table-sm micropipetas-table">
+                <thead>
+                  <tr>
+                    <th colspan="2" class="ion-text-center">1 ml</th>
+                    <th colspan="2" class="ion-text-center">10 ml</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>22-M</td><td class="ion-text-center"><ion-checkbox [(ngModel)]="formData.micropipeta_22m" name="micropipeta_22m"></ion-checkbox></td><td>32-M</td><td class="ion-text-center"><ion-checkbox [(ngModel)]="formData.micropipeta_32m" name="micropipeta_32m"></ion-checkbox></td></tr>
+                  <tr><td>23-M</td><td class="ion-text-center"><ion-checkbox [(ngModel)]="formData.micropipeta_23m" name="micropipeta_23m"></ion-checkbox></td><td>75-M</td><td class="ion-text-center"><ion-checkbox [(ngModel)]="formData.micropipeta_75m" name="micropipeta_75m"></ion-checkbox></td></tr>
+                  <tr><td>72-M</td><td class="ion-text-center"><ion-checkbox [(ngModel)]="formData.micropipeta_72m" name="micropipeta_72m"></ion-checkbox></td><td>94-M</td><td class="ion-text-center"><ion-checkbox [(ngModel)]="formData.micropipeta_94m" name="micropipeta_94m"></ion-checkbox></td></tr>
+                  <tr><td>98-M</td><td class="ion-text-center"><ion-checkbox [(ngModel)]="formData.micropipeta_98m" name="micropipeta_98m"></ion-checkbox></td><td>103-M</td><td class="ion-text-center"><ion-checkbox [(ngModel)]="formData.micropipeta_103m" name="micropipeta_103m"></ion-checkbox></td></tr>
+                  <tr><td>100-M</td><td class="ion-text-center"><ion-checkbox [(ngModel)]="formData.micropipeta_100m" name="micropipeta_100m"></ion-checkbox></td><td></td><td></td></tr>
+                  <tr><td>102-M</td><td class="ion-text-center"><ion-checkbox [(ngModel)]="formData.micropipeta_102m" name="micropipeta_102m"></ion-checkbox></td><td></td><td></td></tr>
+                  <tr><td>106-M</td><td class="ion-text-center"><ion-checkbox [(ngModel)]="formData.micropipeta_106m" name="micropipeta_106m"></ion-checkbox></td><td></td><td></td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Claves y Otros -->
+            <div style="flex: 1; margin-left: 1rem;">
+              <table class="table table-sm clave-table">
+                <tbody>
+                  <tr>
+                    <th>Puntas/pipetas 1ml/clave</th>
+                    <td><ion-input type="text" [(ngModel)]="formData.clave_1ml" name="clave_1ml"></ion-input></td>
+                  </tr>
+                  <tr>
+                    <th>Puntas/pipetas 10ml/clave</th>
+                    <td><ion-input type="text" [(ngModel)]="formData.clave_10ml" name="clave_10ml"></ion-input></td>
+                  </tr>
+                  <tr>
+                    <th>Otros</th>
+                    <td><ion-input type="text" [(ngModel)]="formData.clave_otros" name="clave_otros"></ion-input></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Limpieza -->
+      <ion-card class="ion-flex-grow">
+        <ion-card-header>
+          <ion-card-title class="ion-text-center">Limpieza</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <table class="table table-bordered table-sm limpieza-table">
+            <tbody>
+              <tr>
+                <td>Mesón</td>
+                <td class="ion-text-center"><ion-checkbox [(ngModel)]="formData.limpieza_meson" name="limpieza_meson"></ion-checkbox></td>
+              </tr>
+              <tr>
+                <td>Stomacher 12-M</td>
+                <td class="ion-text-center"><ion-checkbox [(ngModel)]="formData.limpieza_stomacher" name="limpieza_stomacher"></ion-checkbox></td>
+              </tr>
+              <tr>
+                <td>Cámara flujo laminar 8-M</td>
+                <td class="ion-text-center"><ion-checkbox [(ngModel)]="formData.limpieza_camara" name="limpieza_camara"></ion-checkbox></td>
+              </tr>
+              <tr>
+                <td>Balanza 74-M 108-M</td>
+                <td class="ion-text-center"><ion-checkbox [(ngModel)]="formData.limpieza_balanza" name="limpieza_balanza"></ion-checkbox></td>
+              </tr>
+              <tr>
+                <td>Balanza 6-M 99-M</td>
+                <td class="ion-text-center"><ion-checkbox [(ngModel)]="formData.limpieza_balanza2" name="limpieza_balanza2"></ion-checkbox></td>
+              </tr>
+              <tr>
+                <td>Desinfectante en aerosol</td>
+                <td class="ion-text-center"><ion-checkbox [(ngModel)]="formData.limpieza_aerosol" name="limpieza_aerosol"></ion-checkbox></td>
+              </tr>
+              <tr>
+                <td>Otros</td>
+                <td><ion-input type="text" [(ngModel)]="formData.limpieza_otros" name="limpieza_otros"></ion-input></td>
+              </tr>
+            </tbody>
+          </table>
+          <ion-item class="ion-margin-top">
+            <ion-label position="floating">Observaciones limpieza</ion-label>
+            <ion-textarea [(ngModel)]="formData.observaciones_limpieza" name="observaciones_limpieza"></ion-textarea>
+          </ion-item>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Material y equipos de Siembra -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title class="ion-text-center">Material y equipos de Siembra</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="ion-margin-bottom">
+          <ion-item>
+            <ion-label position="floating">Clave</ion-label>
+            <ion-input type="text" [(ngModel)]="formData.clave_general" name="clave_general"></ion-input>
+          </ion-item>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm siembra-table">
+            <tbody>
+              <tr>
+                <td><strong>Puntas 1mL:</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.clave_puntas_1ml" name="clave_puntas_1ml"></ion-input></td>
+                <td><strong>Baño 5-M:</strong></td>
+                <td class="ion-text-center"><ion-checkbox [(ngModel)]="formData.bano_5m" name="bano_5m"></ion-checkbox></td>
+              </tr>
+              <tr>
+                <td><strong>Puntas 10 mL:</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.clave_puntas_10ml" name="clave_puntas_10ml"></ion-input></td>
+                <td><strong>Homogenizador 12-M:</strong></td>
+                <td class="ion-text-center"><ion-checkbox [(ngModel)]="formData.homogenizador_12m" name="homogenizador_12m"></ion-checkbox></td>
+              </tr>
+              <tr>
+                <td><strong>Placas estériles: 57cm2 / 150 mm</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.clave_placas" name="clave_placas"></ion-input></td>
+                <td><strong>Cuenta colonias 9-M:</strong></td>
+                <td class="ion-text-center"><ion-checkbox [(ngModel)]="formData.cuenta_colonias_9m" name="cuenta_colonias_9m"></ion-checkbox></td>
+              </tr>
+              <tr>
+                <td><strong>Asas Drigalsky:</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.clave_asas" name="clave_asas"></ion-input></td>
+                <td><strong>Cuenta colonias 101-M:</strong></td>
+                <td class="ion-text-center"><ion-checkbox [(ngModel)]="formData.cuenta_colonias_101m" name="cuenta_colonias_101m"></ion-checkbox></td>
+              </tr>
+              <tr>
+                <td><strong>Blender:</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.clave_blender" name="clave_blender"></ion-input></td>
+                <td><strong>pHmetro 93-M:</strong></td>
+                <td class="ion-text-center"><ion-checkbox [(ngModel)]="formData.phmetro_93m" name="phmetro_93m"></ion-checkbox></td>
+              </tr>
+              <tr>
+                <td><strong>Bolsas estériles:</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.clave_bolsas" name="clave_bolsas"></ion-input></td>
+                <td><strong>Pipetas desechables:</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.pipetas_desechables" name="pipetas_desechables"></ion-input></td>
+              </tr>
+              <tr>
+                <td><strong>Probeta 250 ml / 100 ml</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.clave_probeta" name="clave_probeta"></ion-input></td>
+                <td><strong>Otro:</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.clave_otro" name="clave_otro"></ion-input></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Diluyentes -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title class="ion-text-center">Diluyentes</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="table-responsive">
+          <table class="table table-bordered table-sm">
+            <tbody>
+              <tr>
+                <td><strong>AP 0,1% 90 ml:</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.ap_90ml" name="ap_90ml"></ion-input></td>
+                <td><strong>AP 0,1% tubos ml:</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.ap_tubos_ml" name="ap_tubos_ml"></ion-input></td>
+              </tr>
+              <tr>
+                <td><strong>AP 0,1% 99 ml:</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.ap_99ml" name="ap_99ml"></ion-input></td>
+                <td><strong>SPS 225 ml:</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.sps_225ml" name="sps_225ml"></ion-input></td>
+              </tr>
+              <tr>
+                <td><strong>AP 0,1% 450 ml:</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.ap_450ml" name="ap_450ml"></ion-input></td>
+                <td><strong>SPS Tubos:</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.sps_tubos" name="sps_tubos"></ion-input></td>
+              </tr>
+              <tr>
+                <td><strong>AP 0,1% 225 ml:</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.ap_225ml" name="ap_225ml"></ion-input></td>
+                <td><strong>SPS sa 90 ml:</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.sps_sa_90ml" name="sps_sa_90ml"></ion-input></td>
+              </tr>
+              <tr>
+                <td><strong>AP 0,1% 500 ml:</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.ap_500ml" name="ap_500ml"></ion-input></td>
+                <td><strong>SPS sa tubos:</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.sps_sa_tubos" name="sps_sa_tubos"></ion-input></td>
+              </tr>
+              <tr>
+                <td><strong>PBS 450 ml:</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.pbs_450ml" name="pbs_450ml"></ion-input></td>
+                <td><strong>Otro:</strong></td>
+                <td><ion-input type="text" [(ngModel)]="formData.diluyente_otro" name="diluyente_otro"></ion-input></td>
+              </tr>
+              <tr>
+                <td><strong>Otros:</strong></td>
+                <td colspan="3"><ion-input type="text" [(ngModel)]="formData.diluyente_otros1" name="diluyente_otros1"></ion-input></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Firma y Guardar -->
+    <div class="ion-margin-vertical ion-text-center">
+      <hr>
+      <div class="ion-text-bold">FIRMA COORDINADOR DE ÁREA</div>
+    </div>
+
+    <div class="ion-text-center ion-margin-bottom">
+      <ion-button type="submit" color="primary" size="large" expand="block">Guardar</ion-button>
+    </div>
+  </form>
+</ion-content>
